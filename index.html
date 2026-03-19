@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>출력실 2026-1 · 국민대 시각디자인</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-logo">국민대<br>VCD</div>
+      <div>
+        <div class="tb-title" id="tbTitle">출력실 신청 2026-1</div>
+        <div class="tb-sub" id="tbSub">시각디자인학과 · 출력 서비스</div>
+      </div>
+    </div>
+    <div class="tb-r">
+      <button class="notif-btn" id="notifBtn" onclick="toggleNotif()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="ndot" id="ndot"></div>
+      </button>
+      <button class="mode-btn" id="modeBtn" onclick="toggleMode()">관리자</button>
+    </div>
+  </div>
+
+  <div class="notif-panel" id="notifPanel">
+    <div class="np-hd">알림 <span class="np-cl" onclick="clearNotifs()">모두 지우기</span></div>
+    <div id="notifList"><div class="ni-empty">새 알림이 없습니다</div></div>
+  </div>
+  <div class="popup-notif" id="popupNotif">
+    <button class="pn-close" onclick="document.getElementById('popupNotif').classList.remove('show')">✕</button>
+    <div class="pn-icon" id="pnIcon">🖨️</div>
+    <div class="pn-title" id="pnTitle">알림</div>
+    <div class="pn-text" id="pnText"></div>
+  </div>
+
+  <!-- ══════════ 학생 페이지 ══════════ -->
+  <div class="page on" id="stuPage">
+    <div class="tabs" id="stuTabs">
+      <div class="tab on" onclick="showSTab(0)">레이저·플로터</div>
+      <div class="tab" onclick="showSTab(1)">리소 인쇄</div>
+      <div class="tab" onclick="showSTab(2)">RISO 예약</div>
+      <div class="tab" onclick="showSTab(3)">내 현황</div>
+      <div class="tab" onclick="showSTab(4)">안내</div>
+    </div>
+
+    <!-- TAB 0 -->
+    <div class="scroll" id="st0">
+      <div style="max-width:480px;margin:0 auto">
+        <div class="queue-card">
+          <div class="qc-label">현재 대기 현황</div>
+          <div class="qc-main"><div class="qc-num" id="qNum">3</div><div class="qc-unit">건 대기 중</div></div>
+          <div class="qc-grid">
+            <div class="qc-item"><div class="qc-item-lbl">예상 대기시간</div><div class="qc-item-val" id="qTime">약 15분</div></div>
+            <div class="qc-item"><div class="qc-item-lbl">현재 근무자</div><div class="qc-item-val" id="qWorker">김경민</div></div>
+          </div>
+        </div>
+        <div class="step-bar">
+          <div class="stp cur" id="sp0"><div class="stp-c">1</div><span class="stp-l">정보입력</span></div>
+          <div class="stp-line" id="sl01"></div>
+          <div class="stp" id="sp1"><div class="stp-c">2</div><span class="stp-l">출력설정</span></div>
+          <div class="stp-line" id="sl12"></div>
+          <div class="stp" id="sp2"><div class="stp-c">3</div><span class="stp-l">파일업로드</span></div>
+          <div class="stp-line" id="sl23"></div>
+          <div class="stp" id="sp3"><div class="stp-c">4</div><span class="stp-l">신청완료</span></div>
+        </div>
+
+        <div id="fs1">
+          <div class="card">
+            <div class="ctitle">학생 정보</div>
+            <div class="frow">
+              <div class="fg"><label>이름</label><input id="sName" placeholder="홍길동"></div>
+              <div class="fg"><label>학번</label><input id="sSid" placeholder="20231234"></div>
+            </div>
+            <div class="fg"><label>연락처</label><input id="sPhone" placeholder="010-0000-0000" type="tel"></div>
+            <div class="fg"><label>학생 구분</label>
+              <div class="og2" style="margin-top:2px">
+                <div class="disc-opt" id="disc-0" onclick="selDisc(0,'일반학생')">일반학생</div>
+                <div class="disc-opt" id="disc-1" onclick="selDisc(1,'학생회')">학생회</div>
+                <div class="disc-opt" id="disc-2" onclick="selDisc(2,'과대/부과대')">과대/부과대</div>
+                <div class="disc-opt" id="disc-3" onclick="selDisc(3,'타과생')">타과생</div>
+              </div>
+            </div>
+          </div>
+          <div class="notice blue">• 타과생 선택 시 기본요금 <strong>2배</strong> &nbsp;• 졸업생 졸업 후 2년 이용 가능</div>
+          <div class="btn-row"><button class="btn primary" onclick="step1Next()">다음 →</button></div>
+        </div>
+
+        <div id="fs2" style="display:none">
+          <!-- 1단계: 크기 선택 -->
+          <div class="card">
+            <div class="ctitle">용지 크기 선택</div>
+            <div class="og2" style="gap:10px">
+              <div class="sz-big on" id="szg-A4" onclick="selSzGroup('A4')">
+                <div class="szg-main">A4</div>
+                <div class="szg-sub">레이저 · 50/100원</div>
+              </div>
+              <div class="sz-big" id="szg-A3" onclick="selSzGroup('A3')">
+                <div class="szg-main">A3</div>
+                <div class="szg-sub">레이저 · 100/200원</div>
+              </div>
+              <div class="sz-big" id="szg-A2" onclick="selSzGroup('A2')">
+                <div class="szg-main">A2</div>
+                <div class="szg-sub">플로터 · 2,500/5,000원</div>
+              </div>
+              <div class="sz-big" id="szg-A1" onclick="selSzGroup('A1')">
+                <div class="szg-main">A1</div>
+                <div class="szg-sub">플로터 · 5,000/7,500원</div>
+              </div>
+              <div class="sz-big" id="szg-A0" onclick="selSzGroup('A0+')">
+                <div class="szg-main">A0+</div>
+                <div class="szg-sub">플로터 · 7,500/10,000원</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2단계: 흑백/컬러 (항상 표시) -->
+          <div class="card" id="colorCard">
+            <div class="ctitle">인쇄 색상</div>
+            <div class="og3" id="colorOpts">
+              <div class="opt on" id="col-bw" onclick="selColor('흑백')">
+                <div class="opt-t">흑백</div>
+                <div class="opt-s" id="col-bw-price">50원/장</div>
+              </div>
+              <div class="opt" id="col-clr" onclick="selColor('컬러')">
+                <div class="opt-t">컬러</div>
+                <div class="opt-s" id="col-clr-price">100원/장</div>
+              </div>
+              <div class="opt" id="col-ohp" onclick="selColor('OHP')" style="display:none">
+                <div class="opt-t">OHP</div>
+                <div class="opt-s">투명 필름</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3단계: 용지 종류 (A2/A1/A0+만) -->
+          <div class="card" id="paperCard" style="display:none">
+            <div class="ctitle">용지 종류</div>
+            <div class="og3">
+              <div class="paper-opt on" id="pp-0" onclick="selPaper(0,'무광')">
+                <div class="po-t">무광</div><div class="po-s">반사 없음</div>
+              </div>
+              <div class="paper-opt" id="pp-1" onclick="selPaper(1,'반광')">
+                <div class="po-t">반광</div><div class="po-s">중간 광택</div>
+              </div>
+              <div class="paper-opt" id="pp-2" onclick="selPaper(2,'유광')">
+                <div class="po-t">유광</div><div class="po-s">높은 광택</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ctitle">수량</div>
+            <div class="frow">
+              <div class="fg"><label>장 수</label><input id="qCount" type="number" value="1" min="1" oninput="calcCost()"></div>
+              <div class="fg"><label>부 수</label><input id="qCopy" type="number" value="1" min="1" oninput="calcCost()"></div>
+            </div>
+            <div class="fg"><label>전달사항</label><input id="qNote" placeholder="예: 실제 사이즈로, 맞춤인쇄(여백 없이), 재단 요청 등"></div>
+          </div>
+          <div class="card">
+            <div class="ctitle">예상 요금</div>
+            <table class="cost-tbl">
+              <tr><td class="lbl">단가</td><td id="cu">50원</td></tr>
+              <tr><td class="lbl">장 × 부</td><td id="cq">1 × 1</td></tr>
+              <tr class="total"><td>합계</td><td id="ct">50원</td></tr>
+            </table>
+          </div>
+          <div class="btn-row">
+            <button class="btn" onclick="goStep(1)">← 이전</button>
+            <button class="btn primary" onclick="goStep(3)">다음 →</button>
+          </div>
+        </div>
+
+        <div id="fs3" style="display:none">
+          <div class="card">
+            <div class="ctitle">파일명 규칙 — 반드시 준수</div>
+            <div class="fname-guide">
+              <div class="fname-title">파일명 형식</div>
+              <div class="fname-row"><div class="fp" id="fn-sz">A4</div><div class="fsep">_</div><div class="fp" id="fn-clr">흑백</div><div class="fsep">_</div><div class="fp" id="fn-pp">일반</div><div class="fsep">.</div><div class="fp">pdf</div></div>
+              <div class="feg">예: <span id="fn-eg">A4_흑백_일반.pdf</span></div>
+            </div>
+            <div class="notice red" style="margin-bottom:0">❌ jpg·png·낱장 여러파일 불가 &nbsp;❌ 25MB 초과 불가 &nbsp;❌ pdf 외 형식 불가</div>
+          </div>
+          <div class="card">
+            <div class="ctitle">PDF 업로드</div>
+            <div class="notice yellow" style="margin-bottom:10px"><strong>체크</strong> &nbsp;① 1개 PDF 병합 ② 파일명 확인 ③ 25MB 이하 ④ 인쇄 방향 확인</div>
+            <input type="file" id="fileInput" accept=".pdf" onchange="handleFile(this)">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+              <div class="uz-icon">📄</div><div class="uz-text">PDF 클릭 또는 드래그</div><div class="uz-sub">최대 25MB · PDF만 가능</div><div class="uz-fname" id="uzName"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ctitle">입금 계좌 확인</div>
+            <div class="acct-box"><div class="acct-lbl">카카오뱅크 · 입금자명 = 이름 일치 필수</div><div class="acct-num">3333-367-642528</div><div class="acct-name">예금주: 김경민</div><button class="acct-copy" onclick="copyAcct(this)">계좌번호 복사</button></div>
+          </div>
+          <div class="btn-row"><button class="btn" onclick="goStep(2)">← 이전</button><button class="btn primary" onclick="showConfirm()">최종 확인 →</button></div>
+        </div>
+
+        <div id="fs4" style="display:none">
+          <div class="card" style="text-align:center;padding:22px 18px">
+            <div style="font-size:12px;color:var(--tx2);margin-bottom:4px">신청번호</div>
+            <div class="pay-badge" id="resultNum">A0</div>
+            <div style="font-size:20px;font-weight:800;margin-top:10px">신청 완료!</div>
+            <div style="font-size:13px;color:var(--tx2);margin-top:4px">파일이 근무자에게 전달되었습니다</div>
+          </div>
+          <div class="queue-card">
+            <div class="qc-label">내 대기 순서</div>
+            <div class="qc-main"><div class="qc-num" id="myQNum">4</div><div class="qc-unit">번째</div></div>
+            <div class="qc-grid">
+              <div class="qc-item"><div class="qc-item-lbl">예상 대기시간</div><div class="qc-item-val" id="myQTime">약 20분</div></div>
+              <div class="qc-item"><div class="qc-item-lbl">내 앞 신청</div><div class="qc-item-val" id="myQBefore">3건</div></div>
+            </div>
+          </div>
+          <div class="pay-hl">
+            <div class="pay-hl-t">⚠️ 지금 입금해주세요 — 입금 전까지 출력 시작 안 됩니다</div>
+            <div class="pay-amt" id="payAmt">50원</div>
+            <div class="pay-dl" id="payDeadline">A4~A3: 오늘 마감 30분 전까지</div>
+          </div>
+          <div class="card"><div class="acct-box" style="margin:0"><div class="acct-lbl">카카오뱅크 · 입금자명 = 이름 일치 필수</div><div class="acct-num">3333-367-642528</div><div class="acct-name">예금주: 김경민</div><button class="acct-copy" onclick="copyAcct(this)">계좌번호 복사</button></div></div>
+          <div style="margin-bottom:12px">
+            <div class="ps"><div class="ps-n">1</div><div class="ps-t">위 계좌로 <strong>지금 바로 입금</strong> · 입금자명 = 이름 일치 필수</div></div>
+            <div class="ps"><div class="ps-n">2</div><div class="ps-t">근무자 입금 확인 후 출력 진행 · 완료 시 <strong>팝업 알림</strong> 발송</div></div>
+            <div class="ps"><div class="ps-n">3</div><div class="ps-t">출력실 방문, 신청번호 확인 후 수령</div></div>
+          </div>
+          <div class="btn-row"><button class="btn" onclick="showSTab(3)">내 현황 보기</button><button class="btn primary" onclick="resetOrder()">새로 신청</button></div>
+          <div style="height:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: 리소 -->
+    <div class="scroll" id="st1" style="display:none">
+      <div style="max-width:480px;margin:0 auto">
+        <div class="notice blue">리소는 개방 <strong>30분 후</strong>부터 마감 <strong>30분 전</strong>까지</div>
+        <div class="card"><div class="ctitle">리소 요금</div><table class="cost-tbl"><tr><td class="lbl">RISO 마스터 (분판 1개)</td><td>1,500원</td></tr><tr><td class="lbl">RISO 인쇄 (장당)</td><td>20원</td></tr></table></div>
+        <div class="card">
+          <div class="ctitle">리소 신청</div>
+          <div class="frow"><div class="fg"><label>이름</label><input id="rName" placeholder="홍길동"></div><div class="fg"><label>학번</label><input id="rSid" placeholder="20231234"></div></div>
+          <div class="fg"><label>예약 일자</label><input type="date" id="rDate"></div>
+          <div class="frow"><div class="fg"><label>인쇄 매수</label><input id="rQty" type="number" value="20" min="1" oninput="calcRiso()"></div><div class="fg"><label>분판 수 (도수)</label><input id="rDiv" type="number" value="1" min="0" oninput="calcRiso()"></div></div>
+          <div class="fg"><label>예상 요금</label><div style="padding:10px 12px;background:var(--kl);border-radius:var(--r2);font-size:18px;font-weight:800;color:var(--kmu)" id="rCost">1,900원</div></div>
+          <div class="fg"><label>색상 / 특이사항</label><input id="rNote" placeholder="예: black, fluorescent pink, 맞춤인쇄(여백 없이) 등"></div>
+          <div class="notice yellow">개인 USB 지참 또는 이메일: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="254e485053464155574c4b51654248444c490b464a48">[email&#160;protected]</a></strong></div>
+        </div>
+        <div class="card"><div class="acct-box" style="margin:0"><div class="acct-lbl">카카오뱅크</div><div class="acct-num">3333-367-642528</div><div class="acct-name">예금주: 김경민</div><button class="acct-copy" onclick="copyAcct(this)">계좌번호 복사</button></div></div>
+        <div class="btn-row"><button class="btn primary" onclick="submitRiso()">리소 신청 완료</button></div>
+        <div style="height:8px"></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: RISO 예약 -->
+    <div class="scroll" id="st2" style="display:none">
+      <div style="max-width:480px;margin:0 auto">
+        <div class="notice blue">2도 기준 <strong>15분 단위</strong> 예약 · 지각 시 본인 불이익</div>
+        <div class="card"><div class="ctitle">날짜 선택</div><div class="fg"><input type="date" id="risoDate" onchange="renderSlots()"></div></div>
+        <div class="card">
+          <div class="ctitle">시간 슬롯 <span style="font-size:10px;color:var(--tx3);font-weight:400">취소선=예약됨</span></div>
+          <div class="slot-grid" id="slotGrid"></div>
+        </div>
+        <div class="card" id="bookCard" style="display:none">
+          <div class="ctitle">예약 정보</div>
+          <div style="font-size:13px;font-weight:700;color:var(--kmu);margin-bottom:10px" id="selectedSlotInfo"></div>
+          <div class="frow"><div class="fg"><label>이름</label><input id="bName" placeholder="홍길동"></div><div class="fg"><label>학번</label><input id="bSid" placeholder="20231234"></div></div>
+          <div class="frow"><div class="fg"><label>인쇄 매수</label><input id="bQty" type="number" value="70"></div><div class="fg"><label>도수</label><input id="bDo" type="number" value="2"></div></div>
+          <div class="fg"><label>색상</label><input id="bColor" placeholder="black, fluorescent pink 등"></div>
+          <div class="btn-row"><button class="btn" onclick="cancelRisoBook()">취소</button><button class="btn primary" onclick="confirmRisoBook()">예약 확정</button></div>
+        </div>
+        <div style="height:8px"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 내 현황 -->
+    <div class="scroll" id="st3" style="display:none">
+      <div style="max-width:480px;margin:0 auto">
+        <div id="myOrderList"></div>
+        <div style="height:8px"></div>
+      </div>
+    </div>
+
+    <!-- TAB 4: 안내 -->
+    <div class="scroll" id="st4" style="display:none">
+      <div style="max-width:480px;margin:0 auto">
+        <div class="card"><div class="ctitle">환불 규정</div><ul class="refund-policy"><li>출력 시작 전 취소 시 전액 환불 가능</li><li>출력 완료 후 환불 불가 (학생 파일 오류 포함)</li><li>기기 오류로 인한 실패는 재출력 또는 전액 환불</li><li>파일명·형식 오류로 인한 결과물 환불 불가</li><li>환불: 근무자 직접 연락 또는 출력실 방문</li></ul><div class="btn-row" style="margin-top:10px"><button class="btn warn" onclick="openRefundModal()">환불 신청하기</button></div></div>
+        <div class="card"><div class="ctitle">수령일 기준</div><table class="cost-tbl"><tr><td class="lbl">A4~A3</td><td>당일 마감 30분 전까지 입금</td></tr><tr><td class="lbl">A2~A0+</td><td>신청일 +1일 (주말·공휴일 제외)</td></tr></table></div>
+        <div class="card"><div class="ctitle">요금표</div><table class="cost-tbl"><tr><td class="lbl">A4 흑백/컬러</td><td>50/100원</td></tr><tr><td class="lbl">A3 흑백/컬러</td><td>100/200원</td></tr><tr><td class="lbl">A2 흑백/컬러</td><td>2,500/5,000원</td></tr><tr><td class="lbl">A1 흑백/컬러</td><td>5,000/7,500원</td></tr><tr><td class="lbl">A0+ 흑백/컬러</td><td>7,500/10,000원</td></tr><tr><td class="lbl">RISO 마스터/인쇄</td><td>1,500원/20원</td></tr></table></div>
+        <div class="card"><div class="ctitle">근무자 연락처</div><div id="workerList"></div></div>
+        <div style="height:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 관리자 페이지 ══════════ -->
+  <div class="page" id="adminPage">
+    <!-- 근무자 바 -->
+    <div class="duty-bar">
+      <div><div class="duty-bar-name" id="dutyName">김경민</div><div class="duty-bar-time" id="dutyTime">금 15:30~18:00</div></div>
+      <div class="duty-bar-r">근무자 전용</div>
+    </div>
+
+    <!-- 4칸 요약 숫자 — 클릭으로 필터 -->
+    <div class="adm-summary">
+      <div class="adm-sum-item c-wait active" onclick="setAdmFilter('wait',this)">
+        <div class="adm-sum-num" id="num-wait">0</div>
+        <div class="adm-sum-lbl">입금 대기</div>
+      </div>
+      <div class="adm-sum-item c-print" onclick="setAdmFilter('print',this)">
+        <div class="adm-sum-num" id="num-print">0</div>
+        <div class="adm-sum-lbl">출력 중</div>
+      </div>
+      <div class="adm-sum-item c-done" onclick="setAdmFilter('done',this)">
+        <div class="adm-sum-num" id="num-done">0</div>
+        <div class="adm-sum-lbl">수령 완료</div>
+      </div>
+      <div class="adm-sum-item c-all" onclick="setAdmFilter('all',this)">
+        <div class="adm-sum-num" id="num-all">0</div>
+        <div class="adm-sum-lbl">전체</div>
+      </div>
+    </div>
+
+    <!-- 탭 -->
+    <div class="adm-tabs">
+      <div class="adm-tab on" onclick="showAdmTab(0)">신청 현황</div>
+      <div class="adm-tab" onclick="showAdmTab(1)">과거 기록</div>
+      <div class="adm-tab" onclick="showAdmTab(2)">RISO</div>
+      <div class="adm-tab" onclick="showAdmTab(3)">정산</div>
+    </div>
+
+    <!-- 검색 -->
+    <div class="adm-search"><input id="admSearch" placeholder="이름, 학번, 신청번호 검색..." oninput="renderAdminOrders()"></div>
+
+    <!-- 신청 현황 -->
+    <div id="at0" style="background:var(--bg)">
+      <div id="admOrderList"></div>
+    </div>
+
+    <!-- 과거 기록 -->
+    <div id="at1" style="display:none">
+      <div class="scroll">
+        <div class="hist-wrap">
+          <table class="hist-tbl">
+            <thead><tr><th>번호</th><th>신청일</th><th>이름</th><th>학번</th><th>사양</th><th>매수</th><th>금액</th><th>상태</th></tr></thead>
+            <tbody id="histBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RISO -->
+    <div id="at2" style="display:none">
+      <div class="scroll">
+        <div class="notice blue" style="margin-bottom:10px">날짜를 선택하면 해당 날짜 예약 현황을 볼 수 있습니다.</div>
+        <div class="fg" style="max-width:220px;margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--tx2)">날짜 선택</label><input type="date" id="adminRisoDate" onchange="renderAdminRisoSlots()"></div>
+        <div class="card"><div class="ctitle">예약 현황 <span id="adminRisoDayLabel" style="font-size:11px;font-weight:400;color:var(--tx3)"></span></div><div id="adminRisoSlotList"><div style="color:var(--tx3);font-size:13px">날짜를 선택해주세요</div></div></div>
+      </div>
+    </div>
+
+    <!-- 정산 -->
+    <div id="at3" style="display:none">
+      <div class="scroll">
+        <div class="settle-grid" id="settleGrid"></div>
+        <div class="card"><div class="ctitle">근무자별 처리 현황</div><div class="ws-grid" id="wsGrid"></div></div>
+        <div class="card"><div class="ctitle">유형별 집계</div><table class="cost-tbl" id="settleTbl"></table></div>
+        <div class="card"><div class="ctitle">최근 7일 수익</div><div class="bar-chart" id="barChart"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">최종 신청 확인</div>
+    <div class="modal-sub">내용 확인 후 신청해주세요</div>
+    <div id="confirmRows"></div>
+    <div class="ctotal"><span class="clbl">납부 금액</span><span class="cval" id="confirmTotal">50원</span></div>
+    <div class="notice yellow" style="margin-top:12px;margin-bottom:0">신청 완료 후 <strong>즉시 입금</strong>해주세요</div>
+    <div class="btn-row" style="margin-top:12px"><button class="btn" onclick="closeConfirm()">수정하기</button><button class="btn primary" onclick="submitOrder()" id="submitBtn">신청 완료</button></div>
+  </div>
+</div>
+
+<!-- REFUND MODAL -->
+<div class="modal-backdrop" id="refundModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">환불 신청</div>
+    <div class="modal-sub">출력 시작 전 취소만 전액 환불 가능합니다</div>
+    <div class="fg"><label>신청번호</label><input id="rfId" placeholder="예: A23"></div>
+    <div class="fg"><label>이름</label><input id="rfName" placeholder="홍길동"></div>
+    <div class="fg"><label>사유</label><select id="rfReason"><option value="">선택</option><option>출력 전 취소 (전액 환불)</option><option>기기 오류로 인한 출력 실패</option><option>기타</option></select></div>
+    <div class="fg"><label>상세 내용</label><textarea id="rfDetail" placeholder="상황을 자세히 적어주세요"></textarea></div>
+    <div class="fg"><label>환불 계좌</label><input id="rfAcct" placeholder="카카오뱅크 계좌번호"></div>
+    <div class="btn-row"><button class="btn" onclick="closeRefundModal()">취소</button><button class="btn primary" onclick="submitRefund()">신청</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

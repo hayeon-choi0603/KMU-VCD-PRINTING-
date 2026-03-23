@@ -315,6 +315,16 @@ function submitOrder(){
     document.getElementById('payDeadline').textContent=['A4','A3'].indexOf(curSz)>=0?'A4~A3: 오늘 마감 30분 전까지':'A2~A0+: 내일까지 입금 필요';
     goStep(4);
     btn.textContent='신청 완료';btn.disabled=false;
+    // 파일 업로드 탭으로 자동 이동 + 정보 자동 입력
+    setTimeout(function(){
+      showSTab(4);
+      document.getElementById('fuOrderId').value=oid;
+      document.getElementById('fuSid').value=sid;
+      document.getElementById('fuName').value=name;
+      fuCheckOrder();
+      document.getElementById('fuSuccess').style.display='none';
+      showToast('📎 파일 업로드 탭으로 이동했어요!');
+    },1800);
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
   },700);
 }

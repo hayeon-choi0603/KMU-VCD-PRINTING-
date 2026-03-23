@@ -5,8 +5,8 @@ var admFilter='wait', selectedRisoSlot=null, risoBookings={};
 // ══════════ SUPABASE 설정 ══════════
 // 아래 두 값을 Supabase 프로젝트에서 복사해서 넣어주세요
 // https://supabase.com → 프로젝트 → Settings → API
-var SUPABASE_URL = '';        // 예: https://xxxx.supabase.co
-var SUPABASE_ANON_KEY = '';   // 예: eyJhbGci...
+var SUPABASE_URL = 'https://mgptjwqrhdvywrzsnxnj.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ncHRqd3FyaGR2eXdyenNueG5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDc1MTUsImV4cCI6MjA4OTc4MzUxNX0.fWnTX3fON0_rec6b_jqW_tJRq2f7etaEx3z8aK-eY-o';
 
 var SB_HEADERS = {
   'apikey': SUPABASE_ANON_KEY,

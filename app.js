@@ -132,7 +132,7 @@ function renderAdminOrders(){
       +'<div class="adm-mid">'
         +'<div class="adm-spec-row"><span class="adm-sz">'+o.type+'</span><span class="adm-sz adm-sz-clr"> '+o.color+'</span><span class="adm-sz adm-sz-qty"> '+o.qty+'장</span>'+(o.copy>1?' &times;'+o.copy+'부':'')+'</div>'
         +paperChip
-        +'<div class="adm-cost">'+( o.cost||0).toLocaleString()+'원 &nbsp;<span class="'+( o.fileOk?'fc-ok':'fc-no')+'">'+( o.fileOk?'✓파일':'✗파일')+'</span></div>'
+        +'<div class="adm-cost">'+( o.cost||0).toLocaleString()+'원 &nbsp;<span class="'+( o.fileOk?'fc-ok fc-dl':'fc-no')+'" '+(o.fileOk?'onclick="admDownloadByOrderId(\''+o.id+'\')" title="클릭하면 파일 다운로드"':'')+'>'+( o.fileOk?'✓파일 ↓':'✗파일')+'</span></div>'
         +noteHtml
         +'<input class="adm-memo" value="'+safeNote+'" placeholder="전달사항 입력 → Enter 시 학생 알림..." id="memo-'+i+'" onkeydown="if(event.key===&quot;Enter&quot;){saveNote('+i+',this.value);this.blur();}" onchange="saveNote('+i+',this.value)">'
         +'<div class="adm-date">'+o.date+' · '+o.worker+'</div>'
@@ -673,7 +673,22 @@ function admLoadFiles() {
   });
 }
 
-function admDownloadFile(rowId, storagePath, fileName) {
+function admDownloadByOrderId(orderId) {
+  if (!sbReady()) { showToast('Supabase 설정 필요'); return; }
+  showToast('📥 파일 찾는 중...');
+  fetch(SUPABASE_URL + '/rest/v1/file_uploads?order_id=eq.' + orderId + '&order=uploaded_at.desc&limit=1', {
+    headers: SB_HEADERS
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(rows) {
+    if (!rows || !rows.length) { showToast('업로드된 파일이 없어요'); return; }
+    var row = rows[0];
+    admDownloadFile(row.id, row.storage_path, row.file_name || 'file.pdf', orderId);
+  })
+  .catch(function(err) { showToast('오류: ' + err.message); });
+}
+
+function admDownloadFile(rowId, storagePath, fileName, orderId) {
   if (!sbReady()) { showToast('Supabase 설정 필요'); return; }
 
   // 다운로드 기록 저장
@@ -685,7 +700,6 @@ function admDownloadFile(rowId, storagePath, fileName) {
 
   showToast('📥 다운로드 준비 중...');
 
-  // Storage에서 직접 파일 fetch 후 blob으로 다운로드
   fetch(SUPABASE_URL + '/storage/v1/object/print-files/' + storagePath, {
     headers: {
       'apikey': SUPABASE_ANON_KEY,
@@ -705,7 +719,20 @@ function admDownloadFile(rowId, storagePath, fileName) {
     a.click();
     document.body.removeChild(a);
     setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
-    showToast('✅ 다운로드 완료! 기록 저장됨');
+    showToast('✅ 다운로드 완료!');
+    // 카드의 ✓파일 ↓ 텍스트를 '다운로드 완료 HH:MM'으로 바꿈
+    if (orderId) {
+      var timeStr = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+      document.querySelectorAll('.fc-dl').forEach(function(el) {
+        if (el.getAttribute('onclick') && el.getAttribute('onclick').indexOf(orderId) >= 0) {
+          el.textContent = '✓ 다운로드 완료 ' + timeStr;
+          el.style.cursor = 'default';
+          el.onclick = null;
+          el.style.textDecoration = 'none';
+          el.style.color = 'var(--gr)';
+        }
+      });
+    }
     setTimeout(admLoadFiles, 800);
   })
   .catch(function(err) {

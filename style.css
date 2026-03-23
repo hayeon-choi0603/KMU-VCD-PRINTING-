@@ -231,11 +231,11 @@ textarea{min-height:68px;resize:vertical;}
 @keyframes spin{to{transform:rotate(360deg);}}
 a{color:var(--kmu);text-decoration:none;font-weight:600;}
 
-/* ═══════════════════════════════
-   관리자 전용 스타일 — 심플&한눈에
-   ═══════════════════════════════ */
+/* �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧��
+   愿�由ъ옄 �꾩슜 �ㅽ��� �� �ы뵆&�쒕늿��
+   �먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�먥븧�� */
 
-/* 상단 현황 숫자 */
+/* �곷떒 �꾪솴 �レ옄 */
 .adm-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--sur);border-bottom:1px solid var(--bdr);}
 .adm-sum-item{padding:14px 8px;text-align:center;border-right:1px solid var(--bdr);cursor:pointer;user-select:none;transition:background .12s;}
 .adm-sum-item:last-child{border-right:none;}
@@ -248,18 +248,18 @@ a{color:var(--kmu);text-decoration:none;font-weight:600;}
 .adm-sum-item.c-done .adm-sum-num{color:var(--gr);}
 .adm-sum-item.c-all .adm-sum-num{color:var(--tx);}
 
-/* 근무자 바 */
+/* 洹쇰Т�� 諛� */
 .duty-bar{background:var(--kmu);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
 .duty-bar-name{font-size:14px;font-weight:700;color:white;}
 .duty-bar-time{font-size:11px;color:rgba(255,255,255,.7);}
 .duty-bar-r{font-size:11px;color:rgba(255,255,255,.6);}
 
-/* 검색 */
+/* 寃��� */
 .adm-search{padding:10px 16px;background:var(--sur);border-bottom:1px solid var(--bdr);}
 .adm-search input{width:100%;padding:9px 12px;border:1.5px solid var(--bdr2);border-radius:20px;font-size:13px;font-family:inherit;outline:none;}
 .adm-search input:focus{border-color:var(--kmu);}
 
-/* 주문 카드 — 관리자용 */
+/* 二쇰Ц 移대뱶 �� 愿�由ъ옄�� */
 .adm-card{background:var(--sur);border-bottom:1px solid var(--bdr);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;}
 .adm-card:first-child{border-top:none;}
 .adm-card.s-wait{border-left:4px solid var(--am);}
@@ -267,13 +267,13 @@ a{color:var(--kmu);text-decoration:none;font-weight:600;}
 .adm-card.s-done{border-left:4px solid var(--gr);background:#FAFFF8;}
 .adm-card.s-err{border-left:4px solid var(--rd);background:#FFF8F8;}
 
-/* 왼쪽: 번호+이름 */
+/* �쇱そ: 踰덊샇+�대쫫 */
 .adm-left{flex-shrink:0;width:68px;}
 .adm-oid{font-size:16px;font-weight:900;color:var(--kmu);}
 .adm-name{font-size:12px;font-weight:700;color:var(--tx);margin-top:2px;}
 .adm-sid{font-size:10px;color:var(--tx3);}
 
-/* 가운데: 사양 */
+/* 媛��대뜲: �ъ뼇 */
 .adm-mid{flex:1;min-width:0;}
 .adm-spec-row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
 .adm-sz{font-size:22px;font-weight:900;color:var(--kmu);line-height:1;}
@@ -288,7 +288,7 @@ a{color:var(--kmu);text-decoration:none;font-weight:600;}
 .fc-ok{background:var(--gr-bg);color:var(--gr2);}
 .fc-no{background:var(--rd-bg);color:var(--rd);}
 
-/* 오른쪽: 액션 버튼들 */
+/* �ㅻⅨ履�: �≪뀡 踰꾪듉�� */
 .adm-right{flex-shrink:0;display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
 .spill{font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;border:1.5px solid var(--bdr2);cursor:pointer;background:var(--bg);color:var(--tx2);font-family:inherit;white-space:nowrap;user-select:none;}
 .spill.dep{background:var(--gr-bg);color:var(--gr2);border-color:#7DCFB6;}
@@ -299,7 +299,7 @@ a{color:var(--kmu);text-decoration:none;font-weight:600;}
 .adm-memo:focus{border-color:var(--kmu);background:white;}
 .adm-date{font-size:10px;color:var(--tx3);margin-top:3px;text-align:right;}
 
-/* 관리자 탭 */
+/* 愿�由ъ옄 �� */
 .adm-tabs{display:flex;background:var(--sur);border-bottom:1px solid var(--bdr);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
 .adm-tabs::-webkit-scrollbar{display:none;}
 .adm-tab{padding:10px 14px;font-size:13px;font-weight:500;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;user-select:none;}
@@ -307,7 +307,7 @@ a{color:var(--kmu);text-decoration:none;font-weight:600;}
 .adm-badge{display:inline-block;background:var(--rd);color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:3px;vertical-align:middle;}
 .adm-badge.blue{background:var(--kmu);}
 
-/* 과거 기록 테이블 */
+/* 怨쇨굅 湲곕줉 �뚯씠釉� */
 .hist-wrap{overflow-x:auto;}
 .hist-tbl{width:100%;border-collapse:collapse;font-size:13px;background:var(--sur);min-width:500px;}
 .hist-tbl thead tr{background:#F7F7F5;}
@@ -321,7 +321,7 @@ a{color:var(--kmu);text-decoration:none;font-weight:600;}
 .sd-on{background:var(--kmu);}
 .sd-done{background:var(--gr);}
 
-/* 정산 */
+/* �뺤궛 */
 .settle-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;}
 .sc{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r2);padding:14px 12px;text-align:center;}
 .sc-v{font-size:22px;font-weight:800;}
@@ -345,9 +345,9 @@ a{color:var(--kmu);text-decoration:none;font-weight:600;}
 .rab{background:var(--am-bg);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--am2);font-weight:600;flex:1;}
 
 /* PC layout for admin */
-/* ── PC 반응형 ── */
+/* ���� PC 諛섏쓳�� ���� */
 @media(min-width:600px){
-  /* 학생 페이지: 중앙 카드 레이아웃 */
+  /* �숈깮 �섏씠吏�: 以묒븰 移대뱶 �덉씠�꾩썐 */
   #stuPage.on {
     background: var(--bg);
   }
@@ -359,23 +359,25 @@ a{color:var(--kmu);text-decoration:none;font-weight:600;}
   #stuTabs {
     justify-content: center;
   }
-  /* 관리자 페이지: 전체 너비 (display는 .page 클래스가 제어) */
+  /* 愿�由ъ옄 �섏씠吏�: �꾩껜 �덈퉬 (display�� .page �대옒�ㅺ� �쒖뼱) */
   #adminPage.on {
     width: 100%;
   }
 }
 
 .refund-policy li{font-size:13px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--bdr);line-height:1.5;list-style:none;}
-.refund-policy li::before{content:"• ";color:var(--kmu);}
+.refund-policy li::before{content:"�� ";color:var(--kmu);}
+.fc-dl{cursor:pointer;text-decoration:underline dotted;transition:opacity .15s;}
+.fc-dl:hover{opacity:.7;}
 
-/* 파일 업로드 존 */
+/* �뚯씪 �낅줈�� 議� */
 .upload-zone{border:2px dashed var(--bdr2);border-radius:var(--r);padding:28px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--kmu);background:var(--kl);}
 .uz-icon{font-size:28px;margin-bottom:6px;}
 .uz-text{font-size:14px;font-weight:600;color:var(--tx);}
 .uz-sub{font-size:11px;color:var(--tx3);margin-top:2px;}
 
-/* 관리자 파일함 */
+/* 愿�由ъ옄 �뚯씪�� */
 .adm-file-row{display:flex;align-items:center;gap:10px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;}
 .adm-file-info{flex:1;min-width:0;}
 .adm-file-oid{font-size:12px;font-weight:800;color:var(--kmu);margin-bottom:2px;}

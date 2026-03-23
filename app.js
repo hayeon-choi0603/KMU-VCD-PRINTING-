@@ -816,6 +816,38 @@ function admDownloadFile(rowId, storagePath, fileName, orderId) {
   });
 }
 
+// ══════════ 온보딩 팝업 ══════════
+function initOnboarding(){
+  if(localStorage.getItem('vcd_onboarded')) return;
+  var steps=[
+    {kicker:'기존엔 이랬는데...',big:'이제 <em>한 화면</em>에서\n다 끝나요',caption:'신청 → 파일전달 → 완료까지',
+     body:'<div class="ob-compare"><div class="ob-col ob-before"><div class="ob-ch">😮‍💨 기존</div><div class="ob-cb"><div class="ob-row ob-bad">구글시트 따로</div><div class="ob-row ob-bad">파일 이메일 전송</div><div class="ob-row ob-bad">신청번호 없음</div><div class="ob-row ob-bad">대기 몇 명인지 모름</div></div></div><div class="ob-col ob-after"><div class="ob-ch">✨ 지금</div><div class="ob-cb"><div class="ob-row ob-good">한 화면에서 신청</div><div class="ob-row ob-good">파일 인앱 업로드</div><div class="ob-row ob-good">신청번호 자동발급</div><div class="ob-row ob-good">대기 순서 실시간</div></div></div></div>'},
+    {kicker:'신청 완료하면',big:'내 순서가\n<em>숫자로 보여요</em>',caption:'새로고침 없이 실시간',
+     body:'<div class="ob-hl"><div class="ob-hl-num">3번째</div><div class="ob-hl-txt"><div class="ob-hl-t">지금 내 대기 순서</div><div class="ob-hl-s">예상 대기 약 15분 · 근무자 김경민</div></div></div><div class="ob-compare"><div class="ob-col ob-before"><div class="ob-ch">😮‍💨 기존</div><div class="ob-cb"><div class="ob-row ob-bad">직접 물어봐야 함</div><div class="ob-row ob-bad">언제 되는지 몰라</div></div></div><div class="ob-col ob-after"><div class="ob-ch">✨ 지금</div><div class="ob-cb"><div class="ob-row ob-good">순서 실시간 표시</div><div class="ob-row ob-good">예상 시간까지</div></div></div></div>'},
+    {kicker:'출력 완료되는 순간',big:'기다리다 놓쳤던\n<em>그 알림</em>',caption:'이제 딴짓해도 괜찮아요',
+     body:'<div class="ob-notif"><div class="ob-nbar"><span class="ob-nbd" style="background:#E24B4A"></span><span class="ob-nbd" style="background:#F5C842"></span><span class="ob-nbd" style="background:#1D9E75"></span><span style="margin-left:6px;font-size:9px;color:#aaa">VCD 출력실</span></div><div class="ob-nbody"><span style="font-size:20px">🖨️</span><div><div class="ob-nt">출력 완료!</div><div class="ob-ns">A35 박지율 — 지금 수령하러 오세요</div></div></div></div><div class="ob-compare"><div class="ob-col ob-before"><div class="ob-ch">😮‍💨 기존</div><div class="ob-cb"><div class="ob-row ob-bad">직접 확인해야</div><div class="ob-row ob-bad">놓치기 일쑤</div></div></div><div class="ob-col ob-after"><div class="ob-ch">✨ 지금</div><div class="ob-cb"><div class="ob-row ob-good">팝업 즉시 알림</div><div class="ob-row ob-good">브라우저 푸시</div></div></div></div>'}
+  ];
+  var cur=0;
+  var el=document.createElement('div');
+  el.id='obBackdrop';
+  el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  el.innerHTML='<style>.ob-modal{background:#fff;border-radius:18px;width:100%;max-width:320px;overflow:hidden}.ob-hero{background:#1B3A6B;padding:18px 18px 14px;text-align:center}.ob-kicker{font-size:10px;color:rgba(255,255,255,.5);margin-bottom:7px}.ob-big{font-size:21px;font-weight:500;color:#fff;line-height:1.35;margin-bottom:5px}.ob-big em{color:#F5C842;font-style:normal}.ob-caption{font-size:11px;color:rgba(255,255,255,.45)}.ob-body{padding:12px 14px 8px}.ob-compare{display:grid;grid-template-columns:1fr 1fr;gap:7px}.ob-col{border-radius:10px;overflow:hidden}.ob-ch{padding:6px 8px;font-size:10px;font-weight:500;text-align:center}.ob-before .ob-ch{background:#F2F2F0;color:#aaa}.ob-after .ob-ch{background:#1B3A6B;color:#fff}.ob-cb{padding:8px;background:#F8F8F6;display:flex;flex-direction:column;gap:5px}.ob-after .ob-cb{background:#EEF4FF}.ob-row{font-size:10px;padding-left:10px;position:relative;line-height:1.5}.ob-row::before{content:"";position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%}.ob-bad{color:#ccc;text-decoration:line-through}.ob-bad::before{background:#E24B4A}.ob-good{color:#1B3A6B;font-weight:500}.ob-good::before{background:#1B3A6B}.ob-hl{background:#1B3A6B;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px}.ob-hl-num{font-size:26px;font-weight:500;color:#F5C842;flex-shrink:0;line-height:1}.ob-hl-t{font-size:12px;font-weight:500;color:#fff}.ob-hl-s{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}.ob-notif{border-radius:10px;border:0.5px solid rgba(0,0,0,.1);overflow:hidden;margin-bottom:8px}.ob-nbar{background:#F2F2F0;padding:5px 10px;display:flex;align-items:center;gap:3px}.ob-nbd{width:6px;height:6px;border-radius:50%;display:inline-block}.ob-nbody{padding:8px 12px;display:flex;align-items:center;gap:8px}.ob-nt{font-size:12px;font-weight:500;color:#111}.ob-ns{font-size:10px;color:#888;margin-top:2px}.ob-foot{padding:8px 14px 16px}.ob-dots{display:flex;justify-content:center;gap:5px;margin-bottom:10px}.ob-dot{width:5px;height:5px;border-radius:50%;background:#D3D1C7;display:inline-block;cursor:pointer;transition:all .2s}.ob-dot.on{background:#1B3A6B;width:16px;border-radius:3px}.ob-brow{display:flex;gap:7px}.ob-bs{flex:1;padding:9px;font-size:12px;border:0.5px solid #ddd;border-radius:9px;background:transparent;color:#aaa;cursor:pointer}.ob-bn{flex:2;padding:9px;font-size:12px;font-weight:500;background:#1B3A6B;color:#fff;border:none;border-radius:9px;cursor:pointer}</style>'
+    +'<div class="ob-modal"><div class="ob-hero" id="obHero"></div><div class="ob-body" id="obBody"></div><div class="ob-foot"><div class="ob-dots" id="obDots"></div><div class="ob-brow"><button class="ob-bs" onclick="obClose()">건너뛰기</button><button class="ob-bn" id="obNext" onclick="obNext()">다음 →</button></div></div></div>';
+  document.body.appendChild(el);
+  function obRender(){
+    var s=steps[cur];
+    document.getElementById('obHero').innerHTML='<div class="ob-kicker">'+s.kicker+'</div><div class="ob-big">'+s.big.replace('\n','<br>')+'</div><div class="ob-caption">'+s.caption+'</div>';
+    document.getElementById('obBody').innerHTML=s.body;
+    document.getElementById('obDots').innerHTML=steps.map(function(_,i){return '<span class="ob-dot'+(i===cur?' on':'')+'" onclick="obGo('+i+')"></span>';}).join('');
+    document.getElementById('obNext').textContent=cur===steps.length-1?'시작하기 →':'다음 →';
+  }
+  window.obNext=function(){if(cur<steps.length-1){cur++;obRender();}else{obClose();}};
+  window.obGo=function(i){cur=i;obRender();};
+  window.obClose=function(){localStorage.setItem('vcd_onboarded','1');var bd=document.getElementById('obBackdrop');if(bd)bd.remove();};
+  obRender();
+}
+// ══════════════════════════════════
+
 // ── INIT ──
 calcCost();calcRiso();
 selDisc(0,'일반학생');
@@ -827,3 +859,4 @@ var rd=document.getElementById('risoDate');if(rd){rd.value=new Date().toISOStrin
 var rdt=document.getElementById('rDate');if(rdt)rdt.value=new Date().toISOString().split('T')[0];
 var ard=document.getElementById('adminRisoDate');if(ard)ard.value=new Date().toISOString().split('T')[0];
 if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+initOnboarding();

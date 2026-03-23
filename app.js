@@ -2,6 +2,23 @@ var curPrice=50,curSz='A4',curClr='흑백',curType='laser',curDisc='일반',curP
 var selectedFile=null,orderCount=0,notifs=[],isAdmin=false;
 var admFilter='wait', selectedRisoSlot=null, risoBookings={};
 
+// ══════════ SUPABASE 설정 ══════════
+// 아래 두 값을 Supabase 프로젝트에서 복사해서 넣어주세요
+// https://supabase.com → 프로젝트 → Settings → API
+var SUPABASE_URL = '';        // 예: https://xxxx.supabase.co
+var SUPABASE_ANON_KEY = '';   // 예: eyJhbGci...
+
+var SB_HEADERS = {
+  'apikey': SUPABASE_ANON_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+  'Content-Type': 'application/json'
+};
+
+function sbReady() {
+  return SUPABASE_URL && SUPABASE_ANON_KEY;
+}
+// ══════════════════════════════════
+
 var WORKERS=[{n:'김경민',p:'010-3848-1516'},{n:'방재연',p:'010-5407-9063'},{n:'이현정',p:'010-3366-8651'},{n:'윤유라',p:'010-7190-7812'},{n:'임수호',p:'010-2039-4578'},{n:'배금비',p:'010-6612-1459'},{n:'성수연',p:'010-4941-8502'}];
 var SCHED={'월':[{t:'10:30~13:00',w:'이현정'},{t:'15:30~18:00',w:'이현정'}],'화':[{t:'10:30~15:30',w:'방재연'},{t:'15:30~18:00',w:'성수연'}],'수':[{t:'10:30~13:00',w:'윤유라'},{t:'13:00~15:30',w:'임수호'}],'목':[{t:'13:00~16:00',w:'윤유라'},{t:'15:30~18:00',w:'성수연'}],'금':[{t:'10:30~13:00',w:'배금비'},{t:'15:30~18:00',w:'김경민'}]};
 var ALL_SLOTS=['10:30','10:45','11:00','11:15','11:30','11:45','12:00','12:15','12:30','12:45','13:00','13:15','13:30','13:45','14:00','14:15','14:30','14:45','15:00','15:15','15:30','15:45','16:00','16:15','16:30','16:45','17:00','17:15'];
@@ -44,17 +61,19 @@ function toggleMode(){
 
 // ── STUDENT TABS ──
 function showSTab(n){
-  for(var i=0;i<=4;i++){var e=document.getElementById('st'+i);if(e)e.style.display=i===n?'block':'none';}
+  for(var i=0;i<=5;i++){var e=document.getElementById('st'+i);if(e)e.style.display=i===n?'block':'none';}
   document.querySelectorAll('#stuTabs .tab').forEach(function(t,i){t.classList.toggle('on',i===n);});
   if(n===3)renderMyOrders();
+  if(n===4)fuInit();
 }
 
 // ── ADMIN TABS ──
 function showAdmTab(n){
-  ['at0','at1','at2','at3'].forEach(function(id,i){var e=document.getElementById(id);if(e)e.style.display=i===n?'block':'none';});
+  ['at0','at1','at2','at3','at4'].forEach(function(id,i){var e=document.getElementById(id);if(e)e.style.display=i===n?'block':'none';});
   document.querySelectorAll('.adm-tab').forEach(function(t,i){t.classList.toggle('on',i===n);});
   if(n===1)renderHistory();
-  if(n===3)renderSettlement();
+  if(n===3)admLoadFiles();
+  if(n===4)renderSettlement();
 }
 
 // ── ADMIN FILTER ──
@@ -383,6 +402,190 @@ document.addEventListener('click', function(e) {
     document.getElementById('notifPanel').classList.remove('on');
   }
 });
+
+// ══════════ 파일 업로드 (학생) ══════════
+var fuSelectedFile = null;
+
+function fuInit() {
+  var notice = document.getElementById('fuSetupNotice');
+  if (notice) notice.style.display = sbReady() ? 'none' : 'block';
+}
+
+function fuCheckOrder() {
+  var oid = (document.getElementById('fuOrderId').value || '').trim().toUpperCase();
+  var sid = (document.getElementById('fuSid').value || '').trim();
+  var name = (document.getElementById('fuName').value || '').trim();
+  var info = document.getElementById('fuMatchInfo');
+  if (!info) return;
+  // adminOrders 안에서 매칭되는지 확인
+  var match = adminOrders.find(function(o) {
+    return o.id.toUpperCase() === oid && o.sid === sid;
+  });
+  if (match && oid && sid) {
+    info.style.display = 'block';
+    info.textContent = '✓ ' + match.name + ' (' + match.type + ' ' + match.color + ') 신청 확인됨';
+    if (!name) document.getElementById('fuName').value = match.name;
+  } else {
+    info.style.display = 'none';
+  }
+}
+
+function fuHandleFile(input) {
+  var f = input.files[0];
+  if (!f) return;
+  if (f.type !== 'application/pdf') { showToast('PDF만 가능합니다'); input.value = ''; return; }
+  if (f.size > 50 * 1024 * 1024) { showToast('50MB 이하만 가능'); input.value = ''; return; }
+  fuSelectedFile = f;
+  var zone = document.getElementById('fuZone');
+  zone.querySelector('.uz-text').textContent = '파일 선택 완료';
+  zone.querySelector('.uz-sub').textContent = (f.size / 1024 / 1024).toFixed(2) + 'MB';
+  var fn = document.getElementById('fuFileName');
+  fn.style.display = 'block';
+  fn.textContent = '📎 ' + f.name;
+}
+
+function fuHandleDrop(e) {
+  e.preventDefault();
+  document.getElementById('fuZone').classList.remove('drag');
+  if (e.dataTransfer.files[0]) {
+    document.getElementById('fuInput').files = e.dataTransfer.files;
+    fuHandleFile(document.getElementById('fuInput'));
+  }
+}
+
+function fuSubmit() {
+  if (!sbReady()) { showToast('Supabase 설정이 필요합니다'); return; }
+  var oid = (document.getElementById('fuOrderId').value || '').trim().toUpperCase();
+  var sid = (document.getElementById('fuSid').value || '').trim();
+  var name = (document.getElementById('fuName').value || '').trim();
+  var fileType = document.getElementById('fuFileType').value;
+  var memo = (document.getElementById('fuMemo').value || '').trim();
+  if (!oid) { showToast('신청번호를 입력해주세요'); return; }
+  if (!sid || !name) { showToast('학번과 이름을 입력해주세요'); return; }
+  if (!fileType) { showToast('파일 종류를 선택해주세요'); return; }
+  if (!fuSelectedFile) { showToast('PDF 파일을 선택해주세요'); return; }
+
+  var btn = document.getElementById('fuSubmitBtn');
+  var btnText = document.getElementById('fuBtnText');
+  btn.disabled = true;
+  btnText.innerHTML = '<span class="spinner"></span> 업로드 중...';
+
+  // 파일명: 신청번호_학번_원본파일명
+  var safeName = fuSelectedFile.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
+  var storagePath = oid + '_' + sid + '_' + Date.now() + '_' + safeName;
+
+  // 1단계: Storage에 파일 업로드
+  fetch(SUPABASE_URL + '/storage/v1/object/print-files/' + storagePath, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/pdf',
+      'x-upsert': 'false'
+    },
+    body: fuSelectedFile
+  })
+  .then(function(r) {
+    if (!r.ok) return r.text().then(function(t) { throw new Error('Storage 오류: ' + t); });
+    return r.json();
+  })
+  .then(function() {
+    // 2단계: DB에 메타데이터 저장
+    return fetch(SUPABASE_URL + '/rest/v1/file_uploads', {
+      method: 'POST',
+      headers: Object.assign({}, SB_HEADERS, { 'Prefer': 'return=minimal' }),
+      body: JSON.stringify({
+        order_id: oid,
+        student_id: sid,
+        student_name: name,
+        file_type: fileType,
+        memo: memo,
+        file_name: fuSelectedFile.name,
+        storage_path: storagePath,
+        file_size: fuSelectedFile.size,
+        uploaded_at: new Date().toISOString()
+      })
+    });
+  })
+  .then(function(r) {
+    if (!r.ok) return r.text().then(function(t) { throw new Error('DB 오류: ' + t); });
+    // 성공
+    btn.disabled = false;
+    btnText.textContent = '파일 업로드';
+    document.getElementById('fuSuccess').style.display = 'block';
+    document.getElementById('fuSuccessMsg').textContent =
+      oid + ' (' + name + ') — ' + fuSelectedFile.name + ' 업로드 완료';
+    fuSelectedFile = null;
+    document.getElementById('fuInput').value = '';
+    var zone = document.getElementById('fuZone');
+    zone.querySelector('.uz-text').textContent = 'PDF 클릭 또는 드래그';
+    zone.querySelector('.uz-sub').textContent = '최대 50MB · PDF만 가능';
+    document.getElementById('fuFileName').style.display = 'none';
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btnText.textContent = '파일 업로드';
+    showToast('오류: ' + err.message);
+    console.error(err);
+  });
+}
+
+// ══════════ 파일함 (관리자) ══════════
+function admLoadFiles() {
+  var list = document.getElementById('admFileList');
+  if (!list) return;
+  if (!sbReady()) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--am);font-size:13px">Supabase 설정이 필요합니다</div>';
+    return;
+  }
+  list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--tx3);font-size:13px">불러오는 중...</div>';
+
+  fetch(SUPABASE_URL + '/rest/v1/file_uploads?order=uploaded_at.desc&limit=100', {
+    headers: SB_HEADERS
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(rows) {
+    if (!rows || !rows.length) {
+      list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--tx3);font-size:13px">업로드된 파일이 없습니다</div>';
+      return;
+    }
+    list.innerHTML = rows.map(function(row) {
+      var sizeMb = row.file_size ? (row.file_size / 1024 / 1024).toFixed(2) + 'MB' : '';
+      var dt = row.uploaded_at ? new Date(row.uploaded_at).toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      return '<div class="adm-file-row">'
+        + '<div class="adm-file-info">'
+          + '<div class="adm-file-oid">' + (row.order_id || '') + '</div>'
+          + '<div class="adm-file-name">' + (row.file_name || '') + '</div>'
+          + '<div class="adm-file-meta">' + (row.student_name || '') + ' · ' + (row.student_id || '') + ' · ' + (row.file_type || '') + (row.memo ? ' · ' + row.memo : '') + '</div>'
+          + '<div class="adm-file-meta2">' + dt + (sizeMb ? ' · ' + sizeMb : '') + '</div>'
+        + '</div>'
+        + '<button class="btn" style="font-size:11px;padding:6px 12px;white-space:nowrap;flex-shrink:0" onclick="admDownloadFile(\'' + row.storage_path + '\',\'' + (row.file_name||'file.pdf') + '\')">다운로드</button>'
+      + '</div>';
+    }).join('');
+  })
+  .catch(function(err) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--rd);font-size:13px">오류: ' + err.message + '</div>';
+  });
+}
+
+function admDownloadFile(storagePath, fileName) {
+  if (!sbReady()) { showToast('Supabase 설정 필요'); return; }
+  // Signed URL 생성 (60초 유효)
+  fetch(SUPABASE_URL + '/storage/v1/object/sign/print-files/' + storagePath, {
+    method: 'POST',
+    headers: Object.assign({}, SB_HEADERS),
+    body: JSON.stringify({ expiresIn: 60 })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.signedURL) throw new Error('URL 생성 실패');
+    var a = document.createElement('a');
+    a.href = SUPABASE_URL + data.signedURL;
+    a.download = fileName;
+    a.click();
+  })
+  .catch(function(err) { showToast('다운로드 오류: ' + err.message); });
+}
 
 // ── INIT ──
 calcCost();calcRiso();

@@ -15,7 +15,13 @@ var SB_HEADERS = {
 };
 
 function sbReady() {
-  return SUPABASE_URL && SUPABASE_ANON_KEY;
+  // 매번 호출 시 최신 값으로 헤더 갱신
+  SB_HEADERS = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    'Content-Type': 'application/json'
+  };
+  return !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 }
 // ══════════════════════════════════
 

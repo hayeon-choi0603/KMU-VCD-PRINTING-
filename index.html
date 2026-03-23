@@ -183,28 +183,29 @@
             </div>
             <div class="notice red" style="margin-bottom:0">❌ jpg·png·낱장 여러파일 불가 &nbsp;❌ 25MB 초과 불가 &nbsp;❌ pdf 외 형식 불가</div>
           </div>
-          <div class="card">
-            <div class="ctitle">PDF 업로드</div>
-            <div class="notice yellow" style="margin-bottom:10px"><strong>체크</strong> &nbsp;① 1개 PDF 병합 ② 파일명 확인 ③ 25MB 이하 ④ 인쇄 방향 확인</div>
+
+          <!-- 파일 선택 + 업로드 한 카드에 묶기 -->
+          <div class="card" style="border:2px solid var(--kmu)">
+            <div class="ctitle" style="color:var(--kmu)">📤 파일 업로드 — 필수</div>
+            <div class="notice yellow" style="margin-bottom:12px"><strong>체크</strong> &nbsp;① 1개 PDF 병합 ② 파일명 확인 ③ 25MB 이하 ④ 인쇄 방향 확인</div>
             <input type="file" id="fileInput" accept=".pdf" onchange="handleFile(this)">
             <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
               <div class="uz-icon">📄</div><div class="uz-text">PDF 클릭 또는 드래그</div><div class="uz-sub">최대 25MB · PDF만 가능</div><div class="uz-fname" id="uzName"></div>
             </div>
+            <!-- 파일 선택 후 업로드 버튼 바로 아래 -->
+            <div style="margin-top:12px">
+              <button id="fs3UploadBtn" onclick="fs3Upload()" style="width:100%;padding:18px;font-size:17px;font-weight:900;background:var(--kmu);color:white;border-radius:var(--r);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:-.3px">
+                <span style="font-size:22px">📤</span><span id="fs3UploadBtnText">파일 업로드하기</span>
+              </button>
+              <div id="fs3UploadResult" style="display:none;margin-top:10px;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:700;background:var(--gr-bg);color:var(--gr2);text-align:center">✅ 업로드 완료! 이제 최종 확인을 눌러주세요</div>
+            </div>
           </div>
+
           <div class="card">
             <div class="ctitle">입금 계좌 확인</div>
             <div class="acct-box"><div class="acct-lbl">카카오뱅크 · 입금자명 = 이름 일치 필수</div><div class="acct-num">3333-367-642528</div><div class="acct-name">예금주: 김경민</div><button class="acct-copy" onclick="copyAcct(this)">계좌번호 복사</button></div>
           </div>
           <div class="btn-row"><button class="btn" onclick="goStep(2)">← 이전</button><button class="btn primary" onclick="showConfirm()">최종 확인 →</button></div>
-
-          <!-- Supabase 파일 업로드 버튼 -->
-          <div id="fs3UploadBox" style="margin-top:4px">
-            <button class="btn" id="fs3UploadBtn" onclick="fs3Upload()" style="width:100%;padding:16px;font-size:16px;font-weight:800;background:var(--kmu);color:white;border-radius:var(--r);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-              <span>📤</span><span id="fs3UploadBtnText">파일 업로드하기</span>
-            </button>
-            <div style="font-size:11px;color:var(--tx3);text-align:center;margin-top:6px">신청 완료 전에 먼저 파일을 업로드해주세요</div>
-            <div id="fs3UploadResult" style="display:none;margin-top:8px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;background:var(--gr-bg);color:var(--gr2)">✅ 업로드 완료!</div>
-          </div>
         </div>
 
         <div id="fs4" style="display:none">

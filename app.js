@@ -657,20 +657,95 @@ function admLoadFiles() {
       var dlTag = row.downloaded_at
         ? '<span style="font-size:10px;color:var(--gr);font-weight:600">✓ 다운로드 ' + new Date(row.downloaded_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) + '</span>'
         : '<span style="font-size:10px;color:var(--tx3)">미다운로드</span>';
-      return '<div class="adm-file-row">'
+      return '<div class="adm-file-row" id="frow-' + row.id + '">'
         + '<div class="adm-file-info">'
           + '<div class="adm-file-oid">' + (row.order_id || '') + '</div>'
           + '<div class="adm-file-name">' + (row.file_name || '') + '</div>'
           + '<div class="adm-file-meta">' + (row.student_name || '') + ' · ' + (row.student_id || '') + ' · ' + (row.file_type || '') + (row.memo ? ' · ' + row.memo : '') + '</div>'
           + '<div class="adm-file-meta2">' + dt + (sizeMb ? ' · ' + sizeMb : '') + ' · ' + dlTag + '</div>'
         + '</div>'
-        + '<button class="btn" style="font-size:11px;padding:6px 12px;white-space:nowrap;flex-shrink:0" onclick="admDownloadFile(\'' + row.id + '\',\'' + row.storage_path + '\',\'' + (row.file_name||'file.pdf').replace(/'/g,"\\'") + '\')">다운로드</button>'
+        + '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
+          + '<button class="btn" style="font-size:11px;padding:6px 12px;white-space:nowrap" onclick="admDownloadFile(\'' + row.id + '\',\'' + row.storage_path + '\',\'' + (row.file_name||'file.pdf').replace(/'/g,"\\'") + '\')">다운로드</button>'
+          + '<button class="btn" style="font-size:11px;padding:6px 12px;white-space:nowrap;color:var(--rd);border-color:var(--rd)" onclick="admDeleteFile(\'' + row.id + '\',\'' + row.storage_path + '\')">삭제</button>'
+        + '</div>'
       + '</div>';
     }).join('');
   })
   .catch(function(err) {
     list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--rd);font-size:13px">오류: ' + err.message + '</div>';
   });
+}
+
+function admDeleteOldFiles() {
+  if (!sbReady()) { showToast('Supabase 설정 필요'); return; }
+
+  // 3일 이전 날짜 계산
+  var cutoff = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+
+  // 3일 이상 된 파일 목록 조회
+  fetch(SUPABASE_URL + '/rest/v1/file_uploads?uploaded_at=lt.' + cutoff + '&select=id,storage_path,file_name,order_id', {
+    headers: SB_HEADERS
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(rows) {
+    if (!rows || !rows.length) {
+      showToast('3일 이상 된 파일이 없어요 👍');
+      return;
+    }
+    if (!confirm('3일 이상 된 파일 ' + rows.length + '개를 삭제할까요?\n삭제 후 복구가 불가능해요.')) return;
+
+    var done = 0;
+    rows.forEach(function(row) {
+      // Storage 삭제
+      fetch(SUPABASE_URL + '/storage/v1/object/print-files/' + row.storage_path, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      }).catch(function(e) { console.warn('Storage 삭제 실패', row.storage_path, e); });
+
+      // DB 삭제
+      fetch(SUPABASE_URL + '/rest/v1/file_uploads?id=eq.' + row.id, {
+        method: 'DELETE',
+        headers: SB_HEADERS
+      })
+      .then(function() {
+        done++;
+        if (done === rows.length) {
+          showToast('🗑️ ' + done + '개 파일 삭제 완료!');
+          admLoadFiles();
+        }
+      })
+      .catch(function(e) { console.warn('DB 삭제 실패', e); });
+    });
+  })
+  .catch(function(err) { showToast('오류: ' + err.message); });
+}
+
+function admDeleteFile(rowId, storagePath) {
+  if (!confirm('이 파일을 삭제할까요? 복구가 불가능해요.')) return;
+  if (!sbReady()) { showToast('Supabase 설정 필요'); return; }
+
+  // Storage에서 파일 삭제
+  fetch(SUPABASE_URL + '/storage/v1/object/print-files/' + storagePath, {
+    method: 'DELETE',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+    }
+  }).catch(function(e) { console.warn('Storage 삭제 실패', e); });
+
+  // DB에서 행 삭제
+  fetch(SUPABASE_URL + '/rest/v1/file_uploads?id=eq.' + rowId, {
+    method: 'DELETE',
+    headers: SB_HEADERS
+  })
+  .then(function(r) {
+    if (!r.ok) return r.text().then(function(t) { throw new Error(t); });
+    // 카드 즉시 제거
+    var el = document.getElementById('frow-' + rowId);
+    if (el) el.remove();
+    showToast('🗑️ 파일 삭제 완료');
+  })
+  .catch(function(err) { showToast('삭제 오류: ' + err.message); });
 }
 
 function admDownloadByOrderId(orderId) {

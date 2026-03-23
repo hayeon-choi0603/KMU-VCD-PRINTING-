@@ -438,6 +438,18 @@
     <!-- 파일함 -->
     <div id="at3" style="display:none">
       <div class="scroll">
+
+        <!-- 공지 배너 -->
+        <div style="background:var(--am-bg);border:1.5px solid var(--am);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div>
+            <div style="font-size:12px;font-weight:800;color:var(--am2)">📢 정기 파일 정리 안내</div>
+            <div style="font-size:11px;color:var(--am2);margin-top:2px">3일에 한 번씩 오래된 파일을 삭제해주세요. 용량 관리에 도움이 돼요.</div>
+          </div>
+          <button onclick="admDeleteOldFiles()" style="flex-shrink:0;padding:8px 14px;font-size:12px;font-weight:800;background:var(--am);color:white;border:none;border-radius:8px;cursor:pointer;white-space:nowrap">
+            🗑️ 3일 이상 일괄삭제
+          </button>
+        </div>
+
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div style="font-size:12px;font-weight:700;color:var(--tx2)">업로드된 파일 목록</div>
           <button class="btn" style="font-size:11px;padding:5px 12px" onclick="admLoadFiles()">새로고침</button>

@@ -303,8 +303,16 @@ function submitOrder(){
     orderCount++;var oid='A'+(adminOrders.length+orderCount+30);
     var no={id:oid,date:'오늘',type:curSz,color:curClr,paper:curPaper,qty:q,copy:c,cost:cost,disc:curDisc==='일반'?'':curDisc,dep:false,prt:false,pku:false,note:note,adminNote:''};
     myOrders.unshift(no);
-    adminOrders.unshift({id:oid,date:'오늘 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),name:name,sid:sid,type:curSz,color:curClr,paper:curPaper,qty:q,copy:c,cost:cost,disc:curDisc==='일반'?'':curDisc,dep:false,prt:false,pku:false,note:note,adminNote:'',worker:'미배정',fileOk:true,errType:''});
+    adminOrders.unshift({id:oid,date:'오늘 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),name:name,sid:sid,type:curSz,color:curClr,paper:curPaper,qty:q,copy:c,cost:cost,disc:curDisc==='일반'?'':curDisc,dep:false,prt:false,pku:false,note:note,adminNote:'',worker:'미배정',fileOk:fs3Uploaded,errType:''});
     historyData.unshift({id:oid,date:'3/'+new Date().getDate(),name:name,sid:sid,spec:curSz+' '+curClr,qty:q,pages:0,cost:cost,dep:false,prt:false,pku:false});
+    // 파일 업로드 됐으면 DB에 실제 신청번호로 업데이트
+    if(fs3Uploaded && window._fs3RowId && sbReady()){
+      fetch(SUPABASE_URL+'/rest/v1/file_uploads?id=eq.'+window._fs3RowId,{
+        method:'PATCH',
+        headers:Object.assign({},SB_HEADERS,{'Prefer':'return=minimal'}),
+        body:JSON.stringify({order_id:oid})
+      }).catch(function(e){console.warn('신청번호 업데이트 실패',e);});
+    }
     closeConfirm();
     var qn=adminOrders.filter(function(o){return !o.prt;}).length;
     document.getElementById('resultNum').textContent=oid;
@@ -328,7 +336,22 @@ function submitOrder(){
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
   },700);
 }
-function resetOrder(){selectedFile=null;document.getElementById('fileInput').value='';document.getElementById('uzName').textContent='';document.getElementById('uploadZone').querySelector('.uz-text').textContent='PDF 클릭 또는 드래그';document.getElementById('uploadZone').querySelector('.uz-sub').textContent='최대 25MB · PDF만 가능';document.getElementById('qNote').value='';document.getElementById('qCount').value=1;document.getElementById('qCopy').value=1;goStep(1);}
+function resetOrder(){
+  selectedFile=null;fs3Uploaded=false;window._fs3RowId=null;window._fs3StoragePath=null;
+  document.getElementById('fileInput').value='';
+  document.getElementById('uzName').textContent='';
+  document.getElementById('uploadZone').querySelector('.uz-text').textContent='PDF 클릭 또는 드래그';
+  document.getElementById('uploadZone').querySelector('.uz-sub').textContent='최대 25MB · PDF만 가능';
+  document.getElementById('qNote').value='';
+  document.getElementById('qCount').value=1;
+  document.getElementById('qCopy').value=1;
+  // 3단계 업로드 버튼 초기화
+  var btn=document.getElementById('fs3UploadBtn');
+  if(btn){btn.disabled=false;btn.style.background='';document.getElementById('fs3UploadBtnText').textContent='파일 업로드하기';}
+  var res=document.getElementById('fs3UploadResult');
+  if(res)res.style.display='none';
+  goStep(1);
+}
 function submitRiso(){showToast('리소 신청 완료! 근무자에게 연락해주세요.');}
 
 // ── MY ORDERS ──
@@ -419,7 +442,80 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// ══════════ 파일 업로드 (학생) ══════════
+// ══════════ 3단계 파일 업로드 ══════════
+var fs3Uploaded = false;
+
+function fs3Upload() {
+  if (!sbReady()) { showToast('Supabase 설정이 필요합니다'); return; }
+  if (!selectedFile) { showToast('PDF 파일을 먼저 선택해주세요'); return; }
+
+  var name = document.getElementById('sName').value.trim();
+  var sid = document.getElementById('sSid').value.trim();
+  if (!name || !sid) { showToast('이름과 학번을 먼저 입력해주세요'); return; }
+
+  var btn = document.getElementById('fs3UploadBtn');
+  var btnText = document.getElementById('fs3UploadBtnText');
+  btn.disabled = true;
+  btnText.textContent = '업로드 중...';
+
+  // 임시 신청번호 (실제 신청번호는 submitOrder에서 확정)
+  var tempOid = 'TMP_' + sid + '_' + Date.now();
+  var safeName = selectedFile.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
+  var storagePath = tempOid + '_' + safeName;
+
+  fetch(SUPABASE_URL + '/storage/v1/object/print-files/' + storagePath, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/pdf',
+      'x-upsert': 'true'
+    },
+    body: selectedFile
+  })
+  .then(function(r) {
+    if (!r.ok) return r.text().then(function(t) { throw new Error(t); });
+    return r.json();
+  })
+  .then(function() {
+    var fileType = curSz + ' ' + curClr;
+    return fetch(SUPABASE_URL + '/rest/v1/file_uploads', {
+      method: 'POST',
+      headers: Object.assign({}, SB_HEADERS, { 'Prefer': 'return=representation' }),
+      body: JSON.stringify({
+        order_id: tempOid,
+        student_id: sid,
+        student_name: name,
+        file_type: fileType,
+        memo: (document.getElementById('qNote').value || '').trim(),
+        file_name: selectedFile.name,
+        storage_path: storagePath,
+        file_size: selectedFile.size,
+        uploaded_at: new Date().toISOString()
+      })
+    });
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(rows) {
+    fs3Uploaded = true;
+    // DB row id 저장해뒀다가 신청번호 확정 후 업데이트
+    window._fs3RowId = rows && rows[0] ? rows[0].id : null;
+    window._fs3StoragePath = storagePath;
+    btn.disabled = false;
+    btnText.textContent = '✅ 업로드 완료!';
+    btn.style.background = 'var(--gr)';
+    document.getElementById('fs3UploadResult').style.display = 'block';
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btnText.textContent = '파일 업로드하기';
+    btn.style.background = '';
+    showToast('업로드 오류: ' + err.message);
+    console.error(err);
+  });
+}
+
+// ══════════ 파일 업로드 (학생 탭) ══════════
 var fuSelectedFile = null;
 
 function fuInit() {
@@ -568,14 +664,17 @@ function admLoadFiles() {
     list.innerHTML = rows.map(function(row) {
       var sizeMb = row.file_size ? (row.file_size / 1024 / 1024).toFixed(2) + 'MB' : '';
       var dt = row.uploaded_at ? new Date(row.uploaded_at).toLocaleString('ko-KR', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      var dlTag = row.downloaded_at
+        ? '<span style="font-size:10px;color:var(--gr);font-weight:600">✓ 다운로드 ' + new Date(row.downloaded_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) + '</span>'
+        : '<span style="font-size:10px;color:var(--tx3)">미다운로드</span>';
       return '<div class="adm-file-row">'
         + '<div class="adm-file-info">'
           + '<div class="adm-file-oid">' + (row.order_id || '') + '</div>'
           + '<div class="adm-file-name">' + (row.file_name || '') + '</div>'
           + '<div class="adm-file-meta">' + (row.student_name || '') + ' · ' + (row.student_id || '') + ' · ' + (row.file_type || '') + (row.memo ? ' · ' + row.memo : '') + '</div>'
-          + '<div class="adm-file-meta2">' + dt + (sizeMb ? ' · ' + sizeMb : '') + '</div>'
+          + '<div class="adm-file-meta2">' + dt + (sizeMb ? ' · ' + sizeMb : '') + ' · ' + dlTag + '</div>'
         + '</div>'
-        + '<button class="btn" style="font-size:11px;padding:6px 12px;white-space:nowrap;flex-shrink:0" onclick="admDownloadFile(\'' + row.storage_path + '\',\'' + (row.file_name||'file.pdf') + '\')">다운로드</button>'
+        + '<button class="btn" style="font-size:11px;padding:6px 12px;white-space:nowrap;flex-shrink:0" onclick="admDownloadFile(\'' + row.id + '\',\'' + row.storage_path + '\',\'' + (row.file_name||'file.pdf').replace(/'/g,"\\'") + '\')">다운로드</button>'
       + '</div>';
     }).join('');
   })
@@ -584,23 +683,39 @@ function admLoadFiles() {
   });
 }
 
-function admDownloadFile(storagePath, fileName) {
+function admDownloadFile(rowId, storagePath, fileName) {
   if (!sbReady()) { showToast('Supabase 설정 필요'); return; }
-  // Signed URL 생성 (60초 유효)
+
+  // 다운로드 기록 먼저 저장
+  fetch(SUPABASE_URL + '/rest/v1/file_uploads?id=eq.' + rowId, {
+    method: 'PATCH',
+    headers: Object.assign({}, SB_HEADERS, { 'Prefer': 'return=minimal' }),
+    body: JSON.stringify({
+      downloaded_at: new Date().toISOString()
+    })
+  }).catch(function(e) { console.warn('기록 저장 실패', e); });
+
+  // Signed URL로 다운로드
   fetch(SUPABASE_URL + '/storage/v1/object/sign/print-files/' + storagePath, {
     method: 'POST',
     headers: Object.assign({}, SB_HEADERS),
-    body: JSON.stringify({ expiresIn: 60 })
+    body: JSON.stringify({ expiresIn: 120 })
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    if (!data.signedURL) throw new Error('URL 생성 실패');
+    if (!data.signedURL) throw new Error('URL 생성 실패: ' + JSON.stringify(data));
+    var url = data.signedURL.startsWith('http') ? data.signedURL : SUPABASE_URL + data.signedURL;
     var a = document.createElement('a');
-    a.href = SUPABASE_URL + data.signedURL;
+    a.href = url;
     a.download = fileName;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    showToast('📥 다운로드 시작! 기록이 저장됐어요');
+    // 목록 새로고침해서 다운로드 기록 반영
+    setTimeout(admLoadFiles, 1000);
   })
-  .catch(function(err) { showToast('다운로드 오류: ' + err.message); });
+  .catch(function(err) { showToast('다운로드 오류: ' + err.message); console.error(err); });
 }
 
 // ── INIT ──

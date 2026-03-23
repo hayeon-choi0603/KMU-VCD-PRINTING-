@@ -43,7 +43,8 @@
       <div class="tab" onclick="showSTab(1)">리소 인쇄</div>
       <div class="tab" onclick="showSTab(2)">RISO 예약</div>
       <div class="tab" onclick="showSTab(3)">내 현황</div>
-      <div class="tab" onclick="showSTab(4)">안내</div>
+      <div class="tab" onclick="showSTab(4)">파일 업로드</div>
+      <div class="tab" onclick="showSTab(5)">안내</div>
     </div>
 
     <!-- TAB 0 -->
@@ -278,8 +279,75 @@
       </div>
     </div>
 
-    <!-- TAB 4: 안내 -->
+    <!-- TAB 4: 파일 업로드 -->
     <div class="scroll" id="st4" style="display:none">
+      <div style="max-width:480px;margin:0 auto">
+        <div class="notice blue">신청 완료 후 PDF 파일을 여기에 업로드해주세요. 신청번호를 반드시 확인해주세요.</div>
+
+        <div class="card" id="fuSetupNotice" style="display:none;border-color:var(--am);background:var(--am-bg)">
+          <div class="ctitle" style="color:var(--am)">설정 필요</div>
+          <div style="font-size:13px;color:var(--am2)">Supabase 연결 정보가 설정되지 않았습니다. app.js 상단의 <code>SUPABASE_URL</code>과 <code>SUPABASE_ANON_KEY</code>를 입력해주세요.</div>
+        </div>
+
+        <div class="card">
+          <div class="ctitle">신청 정보 확인</div>
+          <div class="frow">
+            <div class="fg"><label>신청번호</label><input id="fuOrderId" placeholder="예: A35" oninput="fuCheckOrder()"></div>
+            <div class="fg"><label>학번</label><input id="fuSid" placeholder="20231234" oninput="fuCheckOrder()"></div>
+          </div>
+          <div class="fg"><label>이름</label><input id="fuName" placeholder="홍길동" oninput="fuCheckOrder()"></div>
+          <div id="fuMatchInfo" style="display:none;margin-top:6px;padding:8px 10px;border-radius:8px;font-size:12px;background:var(--gr-bg);color:var(--gr2)">✓ 신청 정보 확인됨</div>
+        </div>
+
+        <div class="card">
+          <div class="ctitle">파일 정보</div>
+          <div class="fg">
+            <label>파일 종류</label>
+            <select id="fuFileType">
+              <option value="">선택해주세요</option>
+              <option value="레이저 출력용">레이저 출력용 (A4/A3)</option>
+              <option value="플로터 출력용">플로터 출력용 (A2/A1/A0+)</option>
+              <option value="RISO 인쇄용">RISO 인쇄용</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+          <div class="fg"><label>메모 (선택)</label><input id="fuMemo" placeholder="파일 관련 특이사항 등"></div>
+        </div>
+
+        <div class="card">
+          <div class="ctitle">PDF 파일 선택</div>
+          <div class="upload-zone" id="fuZone"
+            ondragover="event.preventDefault();this.classList.add('drag')"
+            ondragleave="this.classList.remove('drag')"
+            ondrop="fuHandleDrop(event)"
+            onclick="document.getElementById('fuInput').click()">
+            <div class="uz-icon">📄</div>
+            <div class="uz-text">PDF 클릭 또는 드래그</div>
+            <div class="uz-sub">최대 50MB · PDF만 가능</div>
+          </div>
+          <div id="fuFileName" style="margin-top:8px;font-size:12px;color:var(--tx2);display:none"></div>
+          <input type="file" id="fuInput" accept=".pdf,application/pdf" style="display:none" onchange="fuHandleFile(this)">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn primary" id="fuSubmitBtn" onclick="fuSubmit()">
+            <span id="fuBtnText">파일 업로드</span>
+          </button>
+        </div>
+
+        <div id="fuSuccess" style="display:none">
+          <div class="notice" style="background:var(--gr-bg);border-color:var(--gr);color:var(--gr2);padding:14px 16px;border-radius:12px;border:1px solid">
+            <div style="font-size:16px;font-weight:800;margin-bottom:4px">✅ 업로드 완료!</div>
+            <div id="fuSuccessMsg" style="font-size:13px"></div>
+          </div>
+        </div>
+
+        <div style="height:8px"></div>
+      </div>
+    </div>
+
+    <!-- TAB 5: 안내 -->
+    <div class="scroll" id="st5" style="display:none">
       <div style="max-width:480px;margin:0 auto">
         <div class="card"><div class="ctitle">환불 규정</div><ul class="refund-policy"><li>출력 시작 전 취소 시 전액 환불 가능</li><li>출력 완료 후 환불 불가 (학생 파일 오류 포함)</li><li>기기 오류로 인한 실패는 재출력 또는 전액 환불</li><li>파일명·형식 오류로 인한 결과물 환불 불가</li><li>환불: 근무자 직접 연락 또는 출력실 방문</li></ul><div class="btn-row" style="margin-top:10px"><button class="btn warn" onclick="openRefundModal()">환불 신청하기</button></div></div>
         <div class="card"><div class="ctitle">수령일 기준</div><table class="cost-tbl"><tr><td class="lbl">A4~A3</td><td>당일 마감 30분 전까지 입금</td></tr><tr><td class="lbl">A2~A0+</td><td>신청일 +1일 (주말·공휴일 제외)</td></tr></table></div>
@@ -323,7 +391,8 @@
       <div class="adm-tab on" onclick="showAdmTab(0)">신청 현황</div>
       <div class="adm-tab" onclick="showAdmTab(1)">과거 기록</div>
       <div class="adm-tab" onclick="showAdmTab(2)">RISO</div>
-      <div class="adm-tab" onclick="showAdmTab(3)">정산</div>
+      <div class="adm-tab" onclick="showAdmTab(3)">파일함</div>
+      <div class="adm-tab" onclick="showAdmTab(4)">정산</div>
     </div>
 
     <!-- 검색 -->
@@ -355,8 +424,21 @@
       </div>
     </div>
 
-    <!-- 정산 -->
+    <!-- 파일함 -->
     <div id="at3" style="display:none">
+      <div class="scroll">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:var(--tx2)">업로드된 파일 목록</div>
+          <button class="btn" style="font-size:11px;padding:5px 12px" onclick="admLoadFiles()">새로고침</button>
+        </div>
+        <div id="admFileList">
+          <div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:13px">로딩 중...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 정산 -->
+    <div id="at4" style="display:none">
       <div class="scroll">
         <div class="settle-grid" id="settleGrid"></div>
         <div class="card"><div class="ctitle">근무자별 처리 현황</div><div class="ws-grid" id="wsGrid"></div></div>

@@ -323,16 +323,6 @@ function submitOrder(){
     document.getElementById('payDeadline').textContent=['A4','A3'].indexOf(curSz)>=0?'A4~A3: 오늘 마감 30분 전까지':'A2~A0+: 내일까지 입금 필요';
     goStep(4);
     btn.textContent='신청 완료';btn.disabled=false;
-    // 파일 업로드 탭으로 자동 이동 + 정보 자동 입력
-    setTimeout(function(){
-      showSTab(4);
-      document.getElementById('fuOrderId').value=oid;
-      document.getElementById('fuSid').value=sid;
-      document.getElementById('fuName').value=name;
-      fuCheckOrder();
-      document.getElementById('fuSuccess').style.display='none';
-      showToast('📎 파일 업로드 탭으로 이동했어요!');
-    },1800);
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
   },700);
 }
@@ -686,36 +676,42 @@ function admLoadFiles() {
 function admDownloadFile(rowId, storagePath, fileName) {
   if (!sbReady()) { showToast('Supabase 설정 필요'); return; }
 
-  // 다운로드 기록 먼저 저장
+  // 다운로드 기록 저장
   fetch(SUPABASE_URL + '/rest/v1/file_uploads?id=eq.' + rowId, {
     method: 'PATCH',
     headers: Object.assign({}, SB_HEADERS, { 'Prefer': 'return=minimal' }),
-    body: JSON.stringify({
-      downloaded_at: new Date().toISOString()
-    })
+    body: JSON.stringify({ downloaded_at: new Date().toISOString() })
   }).catch(function(e) { console.warn('기록 저장 실패', e); });
 
-  // Signed URL로 다운로드
-  fetch(SUPABASE_URL + '/storage/v1/object/sign/print-files/' + storagePath, {
-    method: 'POST',
-    headers: Object.assign({}, SB_HEADERS),
-    body: JSON.stringify({ expiresIn: 120 })
+  showToast('📥 다운로드 준비 중...');
+
+  // Storage에서 직접 파일 fetch 후 blob으로 다운로드
+  fetch(SUPABASE_URL + '/storage/v1/object/print-files/' + storagePath, {
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+    }
   })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (!data.signedURL) throw new Error('URL 생성 실패: ' + JSON.stringify(data));
-    var url = data.signedURL.startsWith('http') ? data.signedURL : SUPABASE_URL + data.signedURL;
+  .then(function(r) {
+    if (!r.ok) return r.text().then(function(t) { throw new Error(t); });
+    return r.blob();
+  })
+  .then(function(blob) {
+    var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
     a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    showToast('📥 다운로드 시작! 기록이 저장됐어요');
-    // 목록 새로고침해서 다운로드 기록 반영
-    setTimeout(admLoadFiles, 1000);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    showToast('✅ 다운로드 완료! 기록 저장됨');
+    setTimeout(admLoadFiles, 800);
   })
-  .catch(function(err) { showToast('다운로드 오류: ' + err.message); console.error(err); });
+  .catch(function(err) {
+    showToast('다운로드 오류: ' + err.message);
+    console.error(err);
+  });
 }
 
 // ── INIT ──

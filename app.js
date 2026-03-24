@@ -450,8 +450,13 @@ function fs3Upload() {
 
   // 임시 신청번호 (실제 신청번호는 submitOrder에서 확정)
   var tempOid = 'TMP_' + sid + '_' + Date.now();
-  var safeName = selectedFile.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
-  var storagePath = tempOid + '_' + safeName;
+  var safeName = selectedFile.name
+    .normalize('NFC')
+    .replace(/[^\x00-\x7F]/g, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_{2,}/g, '_')
+    .replace(/^_|_$/g, '') || 'file.pdf';
+  var storagePath = 'orders/' + sid + '_' + Date.now() + '_' + safeName;
 
   fetch(SUPABASE_URL + '/storage/v1/object/print-files/' + storagePath, {
     method: 'POST',
@@ -573,8 +578,13 @@ function fuSubmit() {
   btnText.innerHTML = '<span class="spinner"></span> 업로드 중...';
 
   // 파일명: 신청번호_학번_원본파일명
-  var safeName = fuSelectedFile.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
-  var storagePath = oid + '_' + sid + '_' + Date.now() + '_' + safeName;
+  var safeName = fuSelectedFile.name
+    .normalize('NFC')
+    .replace(/[^\x00-\x7F]/g, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_{2,}/g, '_')
+    .replace(/^_|_$/g, '') || 'file.pdf';
+  var storagePath = 'orders/' + sid + '_' + Date.now() + '_' + safeName;
 
   // 1단계: Storage에 파일 업로드
   fetch(SUPABASE_URL + '/storage/v1/object/print-files/' + storagePath, {

@@ -935,7 +935,6 @@ function admDownloadFile(rowId, storagePath, fileName, orderId) {
 
 // ══════════ 온보딩 팝업 ══════════
 function initOnboarding(){
-  if(localStorage.getItem('vcd_onboarded')) return;
   var steps=[
     {kicker:'기존엔 이랬는데...',big:'이제 <em>한 화면</em>에서\n다 끝나요',caption:'신청 → 파일전달 → 완료까지',
      body:'<div class="ob-compare"><div class="ob-col ob-before"><div class="ob-ch">😮‍💨 기존</div><div class="ob-cb"><div class="ob-row ob-bad">구글시트 따로</div><div class="ob-row ob-bad">파일 이메일 전송</div><div class="ob-row ob-bad">신청번호 없음</div><div class="ob-row ob-bad">대기 몇 명인지 모름</div></div></div><div class="ob-col ob-after"><div class="ob-ch">✨ 지금</div><div class="ob-cb"><div class="ob-row ob-good">한 화면에서 신청</div><div class="ob-row ob-good">파일 인앱 업로드</div><div class="ob-row ob-good">신청번호 자동발급</div><div class="ob-row ob-good">대기 순서 실시간</div></div></div></div>'},

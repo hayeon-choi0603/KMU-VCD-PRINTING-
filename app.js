@@ -103,16 +103,50 @@ function getFiltered(){
 
 // ── ADMIN ORDERS ──
 function renderAdminOrders(){
-  // update summary numbers
+  if(!sbReady()){_renderAdminOrdersLocal();return;}
+  var q=(document.getElementById('admSearch')?document.getElementById('admSearch').value:'').trim().toLowerCase();
+  var statusFilter='';
+  if(admFilter==='wait') statusFilter='&dep=eq.false';
+  else if(admFilter==='print') statusFilter='&dep=eq.true&pku=eq.false';
+  else if(admFilter==='done') statusFilter='&pku=eq.true';
+  var search=q?'':'';
+  fetch(SUPABASE_URL+'/rest/v1/orders?order=created_at.desc&limit=200'+statusFilter,{headers:SB_HEADERS})
+  .then(function(r){return r.json();})
+  .then(function(rows){
+    if(!Array.isArray(rows))rows=[];
+    // 검색 필터 클라이언트 사이드
+    if(q) rows=rows.filter(function(o){return (o.order_id+o.name+o.sid).toLowerCase().indexOf(q)>=0;});
+    adminOrders=rows.map(function(r){return {
+      id:r.order_id,dbId:r.id,date:new Date(r.created_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+      name:r.name,sid:r.sid,phone:r.phone||'',type:r.type,color:r.color,paper:r.paper,
+      qty:r.qty,copy:r.copy,cost:r.cost,disc:r.disc||'',
+      dep:r.dep,prt:r.prt,pku:r.pku,note:r.note||'',adminNote:r.admin_note||'',
+      worker:r.worker||'미배정',fileOk:r.file_ok,errType:r.err_type||''
+    };});
+    document.getElementById('num-wait').textContent=rows.filter(function(o){return !o.dep;}).length;
+    document.getElementById('num-print').textContent=rows.filter(function(o){return o.dep&&!o.pku;}).length;
+    document.getElementById('num-done').textContent=rows.filter(function(o){return o.pku;}).length;
+    document.getElementById('num-all').textContent=rows.length;
+    _renderAdminOrdersLocal();
+  })
+  .catch(function(){_renderAdminOrdersLocal();});
+}
+
+function _renderAdminOrdersLocal(){
+  var q=(document.getElementById('admSearch')?document.getElementById('admSearch').value:'').trim().toLowerCase();
+  var filtered=adminOrders.filter(function(o){
+    if(q){var s=(o.id+o.name+o.sid).toLowerCase();if(s.indexOf(q)<0)return false;}
+    if(admFilter==='wait')return !o.dep;
+    if(admFilter==='print')return o.dep&&!o.pku;
+    if(admFilter==='done')return o.pku;
+    return true;
+  });
   document.getElementById('num-wait').textContent=adminOrders.filter(function(o){return !o.dep;}).length;
   document.getElementById('num-print').textContent=adminOrders.filter(function(o){return o.dep&&!o.pku;}).length;
   document.getElementById('num-done').textContent=adminOrders.filter(function(o){return o.pku;}).length;
   document.getElementById('num-all').textContent=adminOrders.length;
-
-  var filtered=getFiltered();
   var list=document.getElementById('admOrderList');
   if(!filtered.length){list.innerHTML='<div style="padding:32px;text-align:center;color:var(--tx3);font-size:14px">해당 신청이 없습니다</div>';return;}
-
   list.innerHTML=filtered.map(function(o){
     var i=adminOrders.indexOf(o);
     var cls=o.errType?'s-err':o.pku?'s-done':(o.dep&&!o.prt)?'s-print':'s-wait';
@@ -126,13 +160,13 @@ function renderAdminOrders(){
         +'<div class="adm-oid">'+o.id+'</div>'
         +'<div class="adm-name">'+o.name+discTag+'</div>'
         +'<div class="adm-sid">'+o.sid+'</div>'
-        +'<div class="adm-sid" style="margin-top:2px">'+( o.phone||'')+'</div>'
+        +'<div class="adm-sid" style="margin-top:2px">'+(o.phone||'')+'</div>'
         +errBadge
       +'</div>'
       +'<div class="adm-mid">'
         +'<div class="adm-spec-row"><span class="adm-sz">'+o.type+'</span><span class="adm-sz adm-sz-clr"> '+o.color+'</span><span class="adm-sz adm-sz-qty"> '+o.qty+'장</span>'+(o.copy>1?' &times;'+o.copy+'부':'')+'</div>'
         +paperChip
-        +'<div class="adm-cost">'+( o.cost||0).toLocaleString()+'원 &nbsp;<span class="'+( o.fileOk?'fc-ok fc-dl':'fc-no')+'" '+(o.fileOk?'onclick="admDownloadByOrderId(\''+o.id+'\')" title="클릭하면 파일 다운로드"':'')+'>'+( o.fileOk?'✓파일 ↓':'✗파일')+'</span></div>'
+        +'<div class="adm-cost">'+(o.cost||0).toLocaleString()+'원 &nbsp;<span class="'+(o.fileOk?'fc-ok fc-dl':'fc-no')+'" '+(o.fileOk?'onclick="admDownloadByOrderId(\''+o.id+'\')" title="클릭하면 파일 다운로드"':'')+'>'+(o.fileOk?'✓파일 ↓':'✗파일')+'</span></div>'
         +noteHtml
         +'<input class="adm-memo" value="'+safeNote+'" placeholder="전달사항 입력 → Enter 시 학생 알림..." id="memo-'+i+'" onkeydown="if(event.key===&quot;Enter&quot;){saveNote('+i+',this.value);this.blur();}" onchange="saveNote('+i+',this.value)">'
         +'<div class="adm-date">'+o.date+' · '+o.worker+'</div>'
@@ -143,25 +177,60 @@ function renderAdminOrders(){
         +'<button class="spill '+(o.pku?'pku':'')+'" data-act="pku" data-i="'+i+'">수령'+(o.pku?'✓':'')+'</button>'
         +(o.errType?'<button class="spill err" data-act="clearerr" data-i="'+i+'">오류해제</button>':'<button class="spill" data-act="cyclerr" data-i="'+i+'" style="font-size:10px;padding:4px 7px">⚠오류</button>')
       +'</div>'
-      +'</div>';
+    +'</div>';
   }).join('');
 }
 
 function togS(i,key){
-  adminOrders[i][key]=!adminOrders[i][key];
-  if(key==='prt'&&adminOrders[i][key]){
-    triggerNotif('🖨️','출력 완료!',adminOrders[i].name+' ('+adminOrders[i].id+') 출력 완료. 출력실로 방문해주세요.');
-    var mo=myOrders.find(function(o){return o.id===adminOrders[i].id;});if(mo)mo.prt=true;
+  var o=adminOrders[i];
+  o[key]=!o[key];
+  // Supabase 업데이트
+  if(sbReady()&&o.dbId){
+    var patch={};
+    patch[key==='dep'?'dep':key==='prt'?'prt':'pku']=o[key];
+    fetch(SUPABASE_URL+'/rest/v1/orders?id=eq.'+o.dbId,{
+      method:'PATCH',headers:Object.assign({},SB_HEADERS,{'Prefer':'return=minimal'}),
+      body:JSON.stringify(patch)
+    }).catch(function(e){console.warn('togS 저장 실패',e);});
   }
-  if(key==='dep'){var mo=myOrders.find(function(o){return o.id===adminOrders[i].id;});if(mo)mo.dep=adminOrders[i][key];}
-  if(key==='pku'){var mo=myOrders.find(function(o){return o.id===adminOrders[i].id;});if(mo)mo.pku=adminOrders[i][key];}
-  renderAdminOrders();
+  if(key==='prt'&&o[key]){
+    triggerNotif('🖨️','출력 완료!',o.name+' ('+o.id+') 출력 완료. 출력실로 방문해주세요.');
+  }
+  _renderAdminOrdersLocal();
 }
-function cycleErr(i){var t=['파일 오류','입금 오류','메일 오류'];adminOrders[i].errType=t[0];showToast('오류 플래그: '+t[0]);renderAdminOrders();}
-function clearErr(i){adminOrders[i].errType='';renderAdminOrders();}
+function cycleErr(i){
+  var o=adminOrders[i];
+  o.errType='파일 오류';
+  if(sbReady()&&o.dbId){
+    fetch(SUPABASE_URL+'/rest/v1/orders?id=eq.'+o.dbId,{
+      method:'PATCH',headers:Object.assign({},SB_HEADERS,{'Prefer':'return=minimal'}),
+      body:JSON.stringify({err_type:o.errType})
+    }).catch(function(e){console.warn(e);});
+  }
+  showToast('오류 플래그: '+o.errType);
+  _renderAdminOrdersLocal();
+}
+function clearErr(i){
+  var o=adminOrders[i];
+  o.errType='';
+  if(sbReady()&&o.dbId){
+    fetch(SUPABASE_URL+'/rest/v1/orders?id=eq.'+o.dbId,{
+      method:'PATCH',headers:Object.assign({},SB_HEADERS,{'Prefer':'return=minimal'}),
+      body:JSON.stringify({err_type:''})
+    }).catch(function(e){console.warn(e);});
+  }
+  _renderAdminOrdersLocal();
+}
 function saveNote(i,v){
-  adminOrders[i].adminNote=v;
-  if(v.trim()){triggerNotif('💬','근무자 메시지','('+adminOrders[i].id+') '+v);var mo=myOrders.find(function(o){return o.id===adminOrders[i].id;});if(mo)mo.adminNote=v;}
+  var o=adminOrders[i];
+  o.adminNote=v;
+  if(sbReady()&&o.dbId){
+    fetch(SUPABASE_URL+'/rest/v1/orders?id=eq.'+o.dbId,{
+      method:'PATCH',headers:Object.assign({},SB_HEADERS,{'Prefer':'return=minimal'}),
+      body:JSON.stringify({admin_note:v})
+    }).catch(function(e){console.warn(e);});
+  }
+  if(v.trim()){triggerNotif('💬','근무자 메시지','('+o.id+') '+v);}
 }
 
 // ── HISTORY ──
@@ -296,25 +365,33 @@ function closeConfirm(){document.getElementById('confirmModal').classList.remove
 // ── SUBMIT ──
 function submitOrder(){
   var btn=document.getElementById('submitBtn');btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
-  setTimeout(function(){
-    var name=document.getElementById('sName').value.trim(),sid=document.getElementById('sSid').value.trim();
-    var q=parseInt(document.getElementById('qCount').value)||1,c=parseInt(document.getElementById('qCopy').value)||1;
-    var note=document.getElementById('qNote').value.trim(),cost=curPrice*q*c;
-    orderCount++;var oid='A'+(adminOrders.length+orderCount+30);
-    var no={id:oid,date:'오늘',type:curSz,color:curClr,paper:curPaper,qty:q,copy:c,cost:cost,disc:curDisc==='일반'?'':curDisc,dep:false,prt:false,pku:false,note:note,adminNote:''};
-    myOrders.unshift(no);
-    adminOrders.unshift({id:oid,date:'오늘 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),name:name,sid:sid,type:curSz,color:curClr,paper:curPaper,qty:q,copy:c,cost:cost,disc:curDisc==='일반'?'':curDisc,dep:false,prt:false,pku:false,note:note,adminNote:'',worker:'미배정',fileOk:fs3Uploaded,errType:''});
-    historyData.unshift({id:oid,date:'3/'+new Date().getDate(),name:name,sid:sid,spec:curSz+' '+curClr,qty:q,pages:0,cost:cost,dep:false,prt:false,pku:false});
-    // 파일 업로드 됐으면 DB에 실제 신청번호로 업데이트
-    if(fs3Uploaded && window._fs3RowId && sbReady()){
+  var name=document.getElementById('sName').value.trim(),sid=document.getElementById('sSid').value.trim();
+  var phone=document.getElementById('sPhone').value.trim();
+  var q=parseInt(document.getElementById('qCount').value)||1,c=parseInt(document.getElementById('qCopy').value)||1;
+  var note=document.getElementById('qNote').value.trim(),cost=curPrice*q*c;
+  orderCount++;
+  var oid='A'+(Date.now()%100000); // 고유 신청번호
+
+  var orderData={
+    order_id:oid,name:name,sid:sid,phone:phone,
+    type:curSz,color:curClr,paper:curPaper,
+    qty:q,copy:c,cost:cost,
+    disc:curDisc==='일반'?'':curDisc,
+    note:note,admin_note:'',worker:'미배정',
+    dep:false,prt:false,pku:false,
+    file_ok:fs3Uploaded,err_type:''
+  };
+
+  function finish(){
+    // 파일 업로드 신청번호 업데이트
+    if(fs3Uploaded&&window._fs3RowId&&sbReady()){
       fetch(SUPABASE_URL+'/rest/v1/file_uploads?id=eq.'+window._fs3RowId,{
-        method:'PATCH',
-        headers:Object.assign({},SB_HEADERS,{'Prefer':'return=minimal'}),
+        method:'PATCH',headers:Object.assign({},SB_HEADERS,{'Prefer':'return=minimal'}),
         body:JSON.stringify({order_id:oid})
-      }).catch(function(e){console.warn('신청번호 업데이트 실패',e);});
+      }).catch(function(e){console.warn(e);});
     }
     closeConfirm();
-    var qn=adminOrders.filter(function(o){return !o.prt;}).length;
+    var qn=(adminOrders.filter(function(o){return !o.prt;}).length)+1;
     document.getElementById('resultNum').textContent=oid;
     document.getElementById('payAmt').textContent=cost.toLocaleString()+'원';
     document.getElementById('myQNum').textContent=qn;
@@ -324,7 +401,31 @@ function submitOrder(){
     goStep(4);
     btn.textContent='신청 완료';btn.disabled=false;
     if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
-  },700);
+  }
+
+  if(sbReady()){
+    fetch(SUPABASE_URL+'/rest/v1/orders',{
+      method:'POST',
+      headers:Object.assign({},SB_HEADERS,{'Prefer':'return=minimal'}),
+      body:JSON.stringify(orderData)
+    })
+    .then(function(r){
+      if(!r.ok) return r.text().then(function(t){throw new Error(t);});
+      // 로컬 배열에도 추가
+      adminOrders.unshift(Object.assign({},orderData,{id:oid,date:'방금',dbId:null,adminNote:'',errType:'',fileOk:fs3Uploaded}));
+      myOrders.unshift({id:oid,date:'오늘',type:curSz,color:curClr,paper:curPaper,qty:q,copy:c,cost:cost,disc:curDisc==='일반'?'':curDisc,dep:false,prt:false,pku:false,note:note,adminNote:''});
+      finish();
+    })
+    .catch(function(err){
+      showToast('저장 오류: '+err.message);
+      btn.textContent='신청 완료';btn.disabled=false;
+    });
+  } else {
+    // Supabase 없으면 로컬에만
+    adminOrders.unshift(Object.assign({},orderData,{id:oid,date:'방금',dbId:null,adminNote:'',errType:'',fileOk:fs3Uploaded}));
+    myOrders.unshift({id:oid,date:'오늘',type:curSz,color:curClr,paper:curPaper,qty:q,copy:c,cost:cost,disc:curDisc==='일반'?'':curDisc,dep:false,prt:false,pku:false,note:note,adminNote:''});
+    setTimeout(finish,700);
+  }
 }
 function resetOrder(){
   selectedFile=null;fs3Uploaded=false;window._fs3RowId=null;window._fs3StoragePath=null;
@@ -347,13 +448,31 @@ function submitRiso(){showToast('리소 신청 완료! 근무자에게 연락해
 // ── MY ORDERS ──
 function renderMyOrders(){
   var list=document.getElementById('myOrderList');if(!list)return;
+  var sid=document.getElementById('sSid')?document.getElementById('sSid').value.trim():'';
+  if(sbReady()&&sid){
+    fetch(SUPABASE_URL+'/rest/v1/orders?sid=eq.'+sid+'&order=created_at.desc&limit=20',{headers:SB_HEADERS})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      if(!Array.isArray(rows)||!rows.length){
+        list.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--tx3)">신청 내역이 없습니다</div>';return;
+      }
+      myOrders=rows.map(function(r){return {id:r.order_id,date:new Date(r.created_at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'}),type:r.type,color:r.color,paper:r.paper,qty:r.qty,copy:r.copy,cost:r.cost,disc:r.disc||'',dep:r.dep,prt:r.prt,pku:r.pku,note:r.note||'',adminNote:r.admin_note||''};});
+      _renderMyOrdersLocal();
+    })
+    .catch(function(){_renderMyOrdersLocal();});
+  } else {
+    _renderMyOrdersLocal();
+  }
+}
+function _renderMyOrdersLocal(){
+  var list=document.getElementById('myOrderList');if(!list)return;
   if(!myOrders.length){list.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--tx3)">신청 내역이 없습니다</div>';return;}
   list.innerHTML=myOrders.map(function(o){
     var step=o.pku?3:o.prt?2:o.dep?1:0;
     var steps=['입금 대기','입금 확인','출력 완료','수령 완료'];
     var sh=steps.map(function(s,si){return '<div class="track-step '+(si<step?'done':si===step?'cur':'')+'" >'+s+'</div>';}).join('');
     var an=o.adminNote?'<div class="moc-anote"><strong style="font-size:10px;display:block;margin-bottom:2px">근무자 메시지</strong>'+o.adminNote+'</div>':'';
-    var rb=!o.prt?'<button class="refund-btn" data-refund-id="'+o.id+'" >환불 신청</button>':'';
+    var rb=!o.prt?'<button class="refund-btn" data-refund-id="'+o.id+'">환불 신청</button>':'';
     return '<div class="moc"><div class="moc-head"><span class="moc-id">'+o.id+'</span><span class="moc-date">'+o.date+'</span></div><div class="moc-spec">'+o.type+' '+o.color+' · '+o.paper+' · '+o.qty+'장 '+o.copy+'부 · <strong>'+(o.cost||0).toLocaleString()+'원</strong>'+(o.disc?' <span class="tag tg">'+o.disc+'</span>':'')+' </div><div class="track">'+sh+'</div>'+an+'<div style="display:flex;justify-content:flex-end;margin-top:4px">'+rb+'</div></div>';
   }).join('');
 }

@@ -362,7 +362,25 @@ function showConfirm(){
 }
 function closeConfirm(){document.getElementById('confirmModal').classList.remove('on');}
 
-// ── SUBMIT ──
+// ══════════ 구글 시트 연동 ══════════
+var SHEET_ID = '14Rn7IShiiVGE5KBlPcXMsqyLWUXMx0Wuk9pui7EZvJM';
+var SHEET_API_KEY = 'AIzaSyBcyuy6Mct-N-8XeMtdXs1rYV8VL-4JpsE';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPxydEvwO41tjY8FESpStKZOlwgxwnQoDQugFkjWYYv62hX8ohVJq8dDVAUJZqur3x/exec';
+
+function writeToSheet(orderData){
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify(orderData)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.result === 'success') showToast('✅ 구글 시트에도 저장됐어요!');
+    else console.warn('시트 오류:', data.message);
+  })
+  .catch(function(e){ console.warn('시트 저장 실패:', e); });
+}
+// ══════════════════════════════════
 function submitOrder(){
   var btn=document.getElementById('submitBtn');btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
   var name=document.getElementById('sName').value.trim(),sid=document.getElementById('sSid').value.trim();
@@ -383,6 +401,8 @@ function submitOrder(){
   };
 
   function finish(){
+    // 구글 시트에 저장
+    writeToSheet(orderData);
     // 파일 업로드 신청번호 업데이트
     if(fs3Uploaded&&window._fs3RowId&&sbReady()){
       fetch(SUPABASE_URL+'/rest/v1/file_uploads?id=eq.'+window._fs3RowId,{

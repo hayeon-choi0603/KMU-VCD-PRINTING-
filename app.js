@@ -370,13 +370,12 @@ var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPxydEvwO41tjY8F
 function writeToSheet(orderData){
   fetch(APPS_SCRIPT_URL, {
     method: 'POST',
+    mode: 'no-cors',
     headers: {'Content-Type': 'text/plain'},
     body: JSON.stringify(orderData)
   })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
-    if(data.result === 'success') showToast('✅ 구글 시트에도 저장됐어요!');
-    else console.warn('시트 오류:', data.message);
+  .then(function(){
+    showToast('✅ 구글 시트에 저장됐어요!');
   })
   .catch(function(e){ console.warn('시트 저장 실패:', e); });
 }

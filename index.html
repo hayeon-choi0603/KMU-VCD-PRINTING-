@@ -43,8 +43,7 @@
       <div class="tab" onclick="showSTab(1)">리소 인쇄</div>
       <div class="tab" onclick="showSTab(2)">RISO 예약</div>
       <div class="tab" onclick="showSTab(3)">내 현황</div>
-      <div class="tab" onclick="showSTab(4)">파일 업로드</div>
-      <div class="tab" onclick="showSTab(5)">안내</div>
+      <div class="tab" onclick="showSTab(4)">안내</div>
     </div>
 
     <!-- TAB 0 -->
@@ -183,25 +182,14 @@
             </div>
             <div class="notice red" style="margin-bottom:0">❌ jpg·png·낱장 여러파일 불가 &nbsp;❌ 25MB 초과 불가 &nbsp;❌ pdf 외 형식 불가</div>
           </div>
-
-          <!-- 파일 선택 + 업로드 한 카드에 묶기 -->
-          <div class="card" style="border:2px solid var(--kmu)">
-            <div class="ctitle" style="color:var(--kmu)">📤 파일 업로드 — 필수</div>
-            <div class="notice yellow" style="margin-bottom:12px"><strong>체크</strong> &nbsp;① 1개 PDF 병합 ② 파일명 확인 ③ 25MB 이하 ④ 인쇄 방향 확인</div>
-
-            <!-- 업로드 버튼 먼저 -->
-            <button id="fs3UploadBtn" onclick="fs3Upload()" style="width:100%;padding:18px;font-size:17px;font-weight:900;background:var(--kmu);color:white;border-radius:var(--r);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:-.3px;margin-bottom:12px">
-              <span style="font-size:22px">📤</span><span id="fs3UploadBtnText">파일 업로드하기</span>
-            </button>
-            <div id="fs3UploadResult" style="display:none;margin-bottom:12px;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:700;background:var(--gr-bg);color:var(--gr2);text-align:center">✅ 업로드 완료! 이제 최종 확인을 눌러주세요</div>
-
-            <!-- 파일 선택존 아래 -->
+          <div class="card">
+            <div class="ctitle">PDF 업로드</div>
+            <div class="notice yellow" style="margin-bottom:10px"><strong>체크</strong> &nbsp;① 1개 PDF 병합 ② 파일명 확인 ③ 25MB 이하 ④ 인쇄 방향 확인</div>
             <input type="file" id="fileInput" accept=".pdf" onchange="handleFile(this)">
             <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
               <div class="uz-icon">📄</div><div class="uz-text">PDF 클릭 또는 드래그</div><div class="uz-sub">최대 25MB · PDF만 가능</div><div class="uz-fname" id="uzName"></div>
             </div>
           </div>
-
           <div class="card">
             <div class="ctitle">입금 계좌 확인</div>
             <div class="acct-box"><div class="acct-lbl">카카오뱅크 · 입금자명 = 이름 일치 필수</div><div class="acct-num">3333-367-642528</div><div class="acct-name">예금주: 김경민</div><button class="acct-copy" onclick="copyAcct(this)">계좌번호 복사</button></div>
@@ -290,75 +278,8 @@
       </div>
     </div>
 
-    <!-- TAB 4: 파일 업로드 -->
+    <!-- TAB 4: 안내 -->
     <div class="scroll" id="st4" style="display:none">
-      <div style="max-width:480px;margin:0 auto">
-        <div class="notice blue">신청 완료 후 PDF 파일을 여기에 업로드해주세요. 신청번호를 반드시 확인해주세요.</div>
-
-        <div class="card" id="fuSetupNotice" style="display:none;border-color:var(--am);background:var(--am-bg)">
-          <div class="ctitle" style="color:var(--am)">설정 필요</div>
-          <div style="font-size:13px;color:var(--am2)">Supabase 연결 정보가 설정되지 않았습니다. app.js 상단의 <code>SUPABASE_URL</code>과 <code>SUPABASE_ANON_KEY</code>를 입력해주세요.</div>
-        </div>
-
-        <div class="card">
-          <div class="ctitle">신청 정보 확인</div>
-          <div class="frow">
-            <div class="fg"><label>신청번호</label><input id="fuOrderId" placeholder="예: A35" oninput="fuCheckOrder()"></div>
-            <div class="fg"><label>학번</label><input id="fuSid" placeholder="20231234" oninput="fuCheckOrder()"></div>
-          </div>
-          <div class="fg"><label>이름</label><input id="fuName" placeholder="홍길동" oninput="fuCheckOrder()"></div>
-          <div id="fuMatchInfo" style="display:none;margin-top:6px;padding:8px 10px;border-radius:8px;font-size:12px;background:var(--gr-bg);color:var(--gr2)">✓ 신청 정보 확인됨</div>
-        </div>
-
-        <div class="card">
-          <div class="ctitle">파일 정보</div>
-          <div class="fg">
-            <label>파일 종류</label>
-            <select id="fuFileType">
-              <option value="">선택해주세요</option>
-              <option value="레이저 출력용">레이저 출력용 (A4/A3)</option>
-              <option value="플로터 출력용">플로터 출력용 (A2/A1/A0+)</option>
-              <option value="RISO 인쇄용">RISO 인쇄용</option>
-              <option value="기타">기타</option>
-            </select>
-          </div>
-          <div class="fg"><label>메모 (선택)</label><input id="fuMemo" placeholder="파일 관련 특이사항 등"></div>
-        </div>
-
-        <div class="card">
-          <div class="ctitle">PDF 파일 선택</div>
-          <div class="upload-zone" id="fuZone"
-            ondragover="event.preventDefault();this.classList.add('drag')"
-            ondragleave="this.classList.remove('drag')"
-            ondrop="fuHandleDrop(event)"
-            onclick="document.getElementById('fuInput').click()">
-            <div class="uz-icon">📄</div>
-            <div class="uz-text">PDF 클릭 또는 드래그</div>
-            <div class="uz-sub">최대 50MB · PDF만 가능</div>
-          </div>
-          <div id="fuFileName" style="margin-top:8px;font-size:12px;color:var(--tx2);display:none"></div>
-          <input type="file" id="fuInput" accept=".pdf,application/pdf" style="display:none" onchange="fuHandleFile(this)">
-        </div>
-
-        <div class="btn-row">
-          <button class="btn primary" id="fuSubmitBtn" onclick="fuSubmit()">
-            <span id="fuBtnText">파일 업로드</span>
-          </button>
-        </div>
-
-        <div id="fuSuccess" style="display:none">
-          <div class="notice" style="background:var(--gr-bg);border-color:var(--gr);color:var(--gr2);padding:14px 16px;border-radius:12px;border:1px solid">
-            <div style="font-size:16px;font-weight:800;margin-bottom:4px">✅ 업로드 완료!</div>
-            <div id="fuSuccessMsg" style="font-size:13px"></div>
-          </div>
-        </div>
-
-        <div style="height:8px"></div>
-      </div>
-    </div>
-
-    <!-- TAB 5: 안내 -->
-    <div class="scroll" id="st5" style="display:none">
       <div style="max-width:480px;margin:0 auto">
         <div class="card"><div class="ctitle">환불 규정</div><ul class="refund-policy"><li>출력 시작 전 취소 시 전액 환불 가능</li><li>출력 완료 후 환불 불가 (학생 파일 오류 포함)</li><li>기기 오류로 인한 실패는 재출력 또는 전액 환불</li><li>파일명·형식 오류로 인한 결과물 환불 불가</li><li>환불: 근무자 직접 연락 또는 출력실 방문</li></ul><div class="btn-row" style="margin-top:10px"><button class="btn warn" onclick="openRefundModal()">환불 신청하기</button></div></div>
         <div class="card"><div class="ctitle">수령일 기준</div><table class="cost-tbl"><tr><td class="lbl">A4~A3</td><td>당일 마감 30분 전까지 입금</td></tr><tr><td class="lbl">A2~A0+</td><td>신청일 +1일 (주말·공휴일 제외)</td></tr></table></div>
@@ -402,8 +323,7 @@
       <div class="adm-tab on" onclick="showAdmTab(0)">신청 현황</div>
       <div class="adm-tab" onclick="showAdmTab(1)">과거 기록</div>
       <div class="adm-tab" onclick="showAdmTab(2)">RISO</div>
-      <div class="adm-tab" onclick="showAdmTab(3)">파일함</div>
-      <div class="adm-tab" onclick="showAdmTab(4)">정산</div>
+      <div class="adm-tab" onclick="showAdmTab(3)">정산</div>
     </div>
 
     <!-- 검색 -->
@@ -435,33 +355,8 @@
       </div>
     </div>
 
-    <!-- 파일함 -->
-    <div id="at3" style="display:none">
-      <div class="scroll">
-
-        <!-- 공지 배너 -->
-        <div style="background:var(--am-bg);border:1.5px solid var(--am);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-          <div>
-            <div style="font-size:12px;font-weight:800;color:var(--am2)">📢 정기 파일 정리 안내</div>
-            <div style="font-size:11px;color:var(--am2);margin-top:2px">3일에 한 번씩 오래된 파일을 삭제해주세요. 용량 관리에 도움이 돼요.</div>
-          </div>
-          <button onclick="admDeleteOldFiles()" style="flex-shrink:0;padding:8px 14px;font-size:12px;font-weight:800;background:var(--am);color:white;border:none;border-radius:8px;cursor:pointer;white-space:nowrap">
-            🗑️ 3일 이상 일괄삭제
-          </button>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:12px;font-weight:700;color:var(--tx2)">업로드된 파일 목록</div>
-          <button class="btn" style="font-size:11px;padding:5px 12px" onclick="admLoadFiles()">새로고침</button>
-        </div>
-        <div id="admFileList">
-          <div style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:13px">로딩 중...</div>
-        </div>
-      </div>
-    </div>
-
     <!-- 정산 -->
-    <div id="at4" style="display:none">
+    <div id="at3" style="display:none">
       <div class="scroll">
         <div class="settle-grid" id="settleGrid"></div>
         <div class="card"><div class="ctitle">근무자별 처리 현황</div><div class="ws-grid" id="wsGrid"></div></div>
@@ -502,241 +397,5 @@
 
 <div class="toast" id="toast"></div>
 <script src="app.js"></script>
-
-<!-- ══════════ SOORI 오버레이 ══════════ -->
-<div id="sooriOverlay" style="position:fixed;inset:0;z-index:99999;background:#fff;display:flex;">
-<style>
-#sooriOverlay *{box-sizing:border-box;margin:0;padding:0;}
-#sooriOverlay{font-family:'Noto Sans KR',-apple-system,sans-serif;}
-.so-shell{display:flex;width:100%;height:100%;}
-.so-side{width:56px;flex-shrink:0;background:#1a2e6e;display:flex;flex-direction:column;align-items:center;padding:20px 0;}
-.so-logo{font-family:Georgia,serif;font-size:11px;color:rgba(255,255,255,.7);writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.12em;margin-bottom:auto;}
-.so-sdots{display:flex;flex-direction:column;gap:8px;margin:auto 0;}
-.so-sdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:all .25s;}
-.so-sdot.on{background:#fff;height:22px;border-radius:3px;}
-.so-snum{font-size:9px;color:rgba(255,255,255,.25);writing-mode:vertical-rl;transform:rotate(180deg);margin-top:auto;letter-spacing:.08em;}
-.so-main{flex:1;position:relative;overflow:hidden;}
-.so-slide{position:absolute;inset:0;display:flex;align-items:stretch;opacity:0;pointer-events:none;transition:opacity .38s ease,transform .38s ease;transform:translateY(18px);}
-.so-slide.active{opacity:1;pointer-events:all;transform:translateY(0);}
-.so-slide.prev{opacity:0;transform:translateY(-18px);}
-.so-l{flex:1;display:flex;flex-direction:column;justify-content:center;padding:48px 60px 96px;border-right:1px solid #e5e7eb;}
-.so-r{width:380px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:48px 44px 96px 36px;background:#f9fafb;}
-.so-tag{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#4f6ef7;margin-bottom:16px;display:flex;align-items:center;gap:6px;}
-.so-tag::before{content:'';width:14px;height:2px;background:#4f6ef7;border-radius:1px;}
-.so-big{font-size:clamp(36px,4.5vw,64px);font-weight:900;line-height:1.1;color:#111827;margin-bottom:18px;}
-.so-big .hl{color:#1a2e6e;}
-.so-big .num{font-size:clamp(64px,9vw,110px);color:#4f6ef7;line-height:.95;display:block;}
-.so-body{font-size:14px;color:#6b7280;line-height:1.9;max-width:400px;}
-.so-body strong{color:#111827;font-weight:700;}
-.so-body .pt{color:#1a2e6e;font-weight:700;}
-.so-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 18px;margin-bottom:9px;}
-.so-card.acc{background:#1a2e6e;border-color:#1a2e6e;}
-.so-card.done{border-color:#bbf7d0;background:#f0fdf4;}
-.so-card.ing{border-color:#fde68a;background:#fffbeb;}
-.so-card.warn{border-color:#fbbf24;background:#fffbeb;}
-.so-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
-.so-card-t{font-size:13px;font-weight:600;color:#111827;}
-.done .so-card-t{color:#15803d;}
-.ing .so-card-t{color:#b45309;}
-.so-card-s{font-size:11px;color:#9ca3af;}
-.so-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
-.bg{background:#dcfce7;color:#15803d;}
-.by{background:#fef3c7;color:#b45309;}
-.bb{background:#e0e7ff;color:#4f6ef7;}
-.so-check{display:flex;flex-direction:column;gap:7px;}
-.so-crow{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;font-size:13px;}
-.so-crow.done{border-color:#bbf7d0;background:#f0fdf4;color:#15803d;font-weight:500;}
-.so-crow.ing{border-color:#fde68a;background:#fffbeb;color:#b45309;font-weight:500;}
-.so-tl{display:flex;flex-direction:column;}
-.so-ti{display:flex;gap:12px;padding-bottom:15px;position:relative;}
-.so-ti:not(:last-child)::after{content:'';position:absolute;left:10px;top:22px;width:1px;bottom:0;background:#e5e7eb;}
-.so-tdot{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
-.so-tdot.done{background:#4f6ef7;color:#fff;}
-.so-tdot.ing{background:#f59e0b;color:#fff;}
-.so-tdot.wait{background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;}
-.so-tdate{font-size:10px;color:#9ca3af;margin-bottom:1px;}
-.so-ttext{font-size:13px;font-weight:600;color:#111827;}
-.so-tnote{font-size:11px;color:#9ca3af;margin-top:1px;}
-.so-pr{display:flex;flex-direction:column;gap:7px;}
-.so-prow{display:flex;align-items:flex-start;gap:8px;padding:10px 13px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;font-size:13px;color:#6b7280;}
-.so-pdot{width:5px;height:5px;border-radius:50%;background:#4f6ef7;flex-shrink:0;margin-top:5px;}
-.so-prow strong{color:#111827;}
-.so-nav{position:fixed;bottom:0;left:56px;right:0;height:72px;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-top:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;gap:20px;z-index:100000;}
-.so-nbtn{display:flex;align-items:center;gap:5px;padding:11px 26px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:1.5px solid #e5e7eb;background:#fff;color:#6b7280;transition:all .15s;font-family:inherit;}
-.so-nbtn:hover:not(:disabled){background:#f3f4f6;color:#111827;}
-.so-nbtn:disabled{opacity:.2;cursor:default;}
-.so-nbtn.pri{background:#1a2e6e;color:#fff;border-color:#1a2e6e;padding:11px 36px;}
-.so-nbtn.pri:hover{background:#0f1e4a;}
-.so-ndots{display:flex;gap:6px;align-items:center;}
-.so-ndot{width:5px;height:5px;border-radius:50%;background:#e5e7eb;cursor:pointer;transition:all .2s;}
-.so-ndot.on{background:#1a2e6e;width:18px;border-radius:3px;}
-.so-cnt{font-size:11px;color:#9ca3af;letter-spacing:.08em;min-width:36px;text-align:center;}
-</style>
-
-<div class="so-shell">
-  <div class="so-side">
-    <div class="so-logo">SOORI</div>
-    <div class="so-sdots" id="soSideDots"></div>
-    <div class="so-snum" id="soSideNum">01/05</div>
-  </div>
-  <div class="so-main">
-
-    <!-- S0: 완성도 -->
-    <div class="so-slide active" id="so0">
-      <div class="so-l">
-        <div class="so-tag">현재 진행 현황</div>
-        <div class="so-big"><span class="num">78%</span>완성되었습니다.</div>
-        <p class="so-body">핵심 기능은 모두 완성되었습니다.<br>현재 <strong>테스트가 진행 중</strong>이며,<br>출력실 담당자 협의가 마무리되는 즉시<br><span class="pt">공식 운영이 시작됩니다.</span></p>
-      </div>
-      <div class="so-r">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin-bottom:12px;">항목별 현황</div>
-        <div class="so-check">
-          <div class="so-crow done"><span>✓ 웹 시스템 완성 & 배포</span><span class="so-badge bg">완료</span></div>
-          <div class="so-crow done"><span>✓ 한지연 교수님 오너 확정</span><span class="so-badge bg">완료</span></div>
-          <div class="so-crow done"><span>✓ 데이터베이스 구축</span><span class="so-badge bg">완료</span></div>
-          <div class="so-crow done"><span>✓ 파일 업로드 시스템</span><span class="so-badge bg">완료</span></div>
-          <div class="so-crow ing"><span>⟳ 출력실 담당자 협의</span><span class="so-badge by">진행 중</span></div>
-          <div class="so-crow ing"><span>⟳ 구글 시트 자동 연동</span><span class="so-badge by">80%</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S1: 교수님 -->
-    <div class="so-slide" id="so1">
-      <div class="so-l">
-        <div class="so-tag">교수님 오너 확정</div>
-        <div class="so-big">교수님을 직접<br>설득해<br><span class="hl">오너로 섭외</span><br>했습니다.</div>
-        <p class="so-body">교수님이 오너인 이상,<br><span class="pt">이 시스템의 실현은 거의 확정입니다.</span><br><br>과제가 끝나도 이 프로젝트는 계속됩니다.<br><strong>Soori는 끝까지 실현 시킵니다.</strong></p>
-      </div>
-      <div class="so-r">
-        <div class="so-card acc" style="margin-bottom:10px;">
-          <div style="font-size:11px;color:rgba(255,255,255,.55);margin-bottom:4px;">출력실 담당 교수님</div>
-          <div style="font-size:24px;font-weight:700;color:#fff;">한지연 교수님</div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:5px;">오너로 공식 참여 확정</div>
-        </div>
-        <div class="so-card">
-          <div style="font-size:12px;font-weight:600;color:#111827;margin-bottom:8px;">이것이 의미하는 것</div>
-          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#6b7280;line-height:1.6;">
-            <div>→ <strong style="color:#111827;">공식 운영</strong>의 제도적 보증</div>
-            <div>→ 학생 주도 + <strong style="color:#111827;">교수님 백업</strong></div>
-            <div>→ 단순 과제가 아닌 <strong style="color:#1a2e6e;">실제 프로젝트</strong></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S2: 일정 -->
-    <div class="so-slide" id="so2">
-      <div class="so-l">
-        <div class="so-tag">앞으로의 일정</div>
-        <div class="so-big"><span class="hl">4/7</span><br>테스트 운영<br>시작 예정.</div>
-        <p class="so-body">현재 테스트가 진행 중이며,<br>담당자 협의가 완료되는 즉시<br><span class="pt">운영을 시작할 수 있는 상태</span>입니다.<br><br>이번 학기가 아니더라도<br><strong>재학 기간 내 반드시 실현</strong>합니다.</p>
-      </div>
-      <div class="so-r">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin-bottom:12px;">전체 로드맵</div>
-        <div class="so-tl">
-          <div class="so-ti"><div class="so-tdot done">✓</div><div><div class="so-tdate">2026년 3월 · 완료</div><div class="so-ttext">시스템 구축 + 교수님 오너 확정</div></div></div>
-          <div class="so-ti"><div class="so-tdot ing">→</div><div><div class="so-tdate">2026년 4/7 · 목표</div><div class="so-ttext">테스트 운영 시작</div><div class="so-tnote">담당자 협의 완료 즉시</div></div></div>
-          <div class="so-ti"><div class="so-tdot wait">○</div><div><div class="so-tdate">이번 학기 내</div><div class="so-ttext">공식 운영 시작</div></div></div>
-          <div class="so-ti"><div class="so-tdot wait">○</div><div><div class="so-tdate">재학 기간 내 · 무조건</div><div class="so-ttext">완전한 시스템 공식 운영</div></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S3: 코인 -->
-    <div class="so-slide" id="so3">
-      <div class="so-l">
-        <div class="so-tag">여러분의 코인이 필요한 이유</div>
-        <div class="so-big">이 시스템은<br>과제가 끝나도<br><span class="hl">계속됩니다.</span></div>
-        <p class="so-body">하지만 과제가 끝나야<br>더 빠르게 실현시킬 수 있다는<br>아이러니가 있습니다.<br><br>여러분의 코인 한 표가<br><span class="pt">이 시스템이 필요하다는 증거</span>가 됩니다.<br><br><strong style="font-size:16px;">수리의 힘이 되어주세요.</strong></p>
-      </div>
-      <div class="so-r">
-        <div class="so-card warn" style="margin-bottom:10px;">
-          <div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:7px;">이것만 기억해주세요</div>
-          <div style="font-size:15px;color:#78350f;line-height:1.8;font-weight:500;">이 시스템은<br><strong>과제가 끝나도 계속됩니다.</strong></div>
-        </div>
-        <div class="so-card acc">
-          <div style="font-size:19px;font-weight:900;color:#fff;line-height:1.4;">수리의 힘이<br>되어주세요 🙏</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S4: 약속 -->
-    <div class="so-slide" id="so4">
-      <div class="so-l">
-        <div class="so-tag">약속</div>
-        <div class="so-big" style="font-size:clamp(26px,3.2vw,46px);line-height:1.2;">최하연 (Soori)의<br>이름을 걸고<br><span class="hl">실현 시킵니다.</span></div>
-        <p class="so-body">진행 상황은 이 페이지에서<br><span class="pt">실시간으로 계속 업데이트</span>됩니다.</p>
-        <button onclick="closeSoori()" style="margin-top:24px;background:#1a2e6e;color:#fff;font-weight:700;font-size:15px;padding:14px 28px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;">출력실 시스템 바로가기 →</button>
-      </div>
-      <div class="so-r">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af;margin-bottom:12px;">약속 목록</div>
-        <div class="so-pr">
-          <div class="so-prow"><div class="so-pdot"></div><div><strong>4/7</strong> 테스트 운영 시작 예정</div></div>
-          <div class="so-prow"><div class="so-pdot"></div><div>출력실 담당자 협의 중 — <strong>한지연 교수님 백업</strong></div></div>
-          <div class="so-prow"><div class="so-pdot"></div><div>이번 학기 내 공식 운영 목표</div></div>
-          <div class="so-prow"><div class="so-pdot"></div><div><strong>재학 기간 내 반드시 실현</strong> 보장</div></div>
-          <div class="so-prow"><div class="so-pdot"></div><div>진행 상황 <strong>이 페이지 실시간 공개</strong></div></div>
-        </div>
-        <div style="margin-top:10px;padding:13px;background:#eef0fe;border-radius:10px;font-size:13px;color:#1a2e6e;font-weight:600;text-align:center;">수리의 힘이 되어주세요 🙏</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="so-nav">
-  <button class="so-nbtn" id="soPrev" onclick="soGo(soC-1)" disabled>← 이전</button>
-  <div class="so-ndots" id="soNdots"></div>
-  <span class="so-cnt" id="soCnt">01 / 05</span>
-  <button class="so-nbtn pri" id="soNext" onclick="soGo(soC+1)">다음 →</button>
-</div>
-
-<script>
-var soC=0,soT=5;
-(function(){
-  var sd=document.getElementById('soSideDots');
-  var nd=document.getElementById('soNdots');
-  for(var i=0;i<soT;i++){
-    (function(i){
-      var s=document.createElement('div');s.className='so-sdot'+(i===0?' on':'');s.onclick=function(){soGo(i);};sd.appendChild(s);
-      var n=document.createElement('div');n.className='so-ndot'+(i===0?' on':'');n.onclick=function(){soGo(i);};nd.appendChild(n);
-    })(i);
-  }
-})();
-
-function soGo(n){
-  if(n<0||n>=soT)return;
-  var ss=document.querySelectorAll('.so-slide');
-  ss[soC].classList.remove('active');ss[soC].classList.add('prev');
-  setTimeout(function(){ss.forEach(function(s){s.classList.remove('prev');});},400);
-  soC=n;ss[soC].classList.add('active');
-  document.querySelectorAll('.so-sdot').forEach(function(el,i){el.classList.toggle('on',i===soC);});
-  document.querySelectorAll('.so-ndot').forEach(function(el,i){el.classList.toggle('on',i===soC);});
-  document.getElementById('soPrev').disabled=soC===0;
-  document.getElementById('soSideNum').textContent=String(soC+1).padStart(2,'0')+'/'+String(soT).padStart(2,'0');
-  document.getElementById('soCnt').textContent=String(soC+1).padStart(2,'0')+' / '+String(soT).padStart(2,'0');
-  var nb=document.getElementById('soNext');
-  if(soC===soT-1){nb.textContent='시스템 바로가기 →';nb.onclick=closeSoori;}
-  else{nb.textContent='다음 →';nb.onclick=function(){soGo(soC+1);};}
-}
-
-function closeSoori(){
-  var o=document.getElementById('sooriOverlay');
-  o.style.transition='opacity .4s ease';o.style.opacity='0';
-  setTimeout(function(){o.style.display='none';},400);
-}
-
-document.addEventListener('keydown',function(e){
-  var o=document.getElementById('sooriOverlay');
-  if(!o||o.style.display==='none')return;
-  if(e.key==='ArrowRight'||e.key==='ArrowDown')soGo(soC+1);
-  if(e.key==='ArrowLeft'||e.key==='ArrowUp')soGo(soC-1);
-  if(e.key==='Escape')closeSoori();
-});
-</script>
-</div>
-<!-- ══════════════════════════════════ -->
-
 </body>
-</html>
+</html>ㅍ

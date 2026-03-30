@@ -79,7 +79,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--p);background:#fff;}
 textarea{min-height:68px;resize:vertical;}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 
-/* CHIPS (학생 구분 등) */
+/* CHIPS (�숈깮 援щ텇 ��) */
 .chip-row{display:flex;gap:6px;flex-wrap:wrap;}
 .chip-opt{padding:8px 14px;border-radius:99px;font-size:12px;font-weight:600;background:#fff;border:1.5px solid var(--bdr2);color:var(--tx2);cursor:pointer;transition:all .15s;user-select:none;}
 .chip-opt.on{background:var(--pl);border-color:var(--p);color:var(--p);}
@@ -361,67 +361,96 @@ textarea{min-height:68px;resize:vertical;}
 .duty-bar-time{font-size:11px;color:rgba(255,255,255,.7);margin-top:1px;}
 .duty-bar-r{font-size:11px;color:rgba(255,255,255,.5);}
 
-/* PC 반응형 */
+/* PC 諛섏쓳�� */
 @media(min-width:600px){
+  html,body{font-size:16px;}
   #stuPage.on{background:var(--bg);}
-  #stuTabs{justify-content:center;padding:0 0 8px;}
   #adminPage.on{width:100%;}
 
-  /* 히어로 + 대기카드 가로 배치 */
-  .hero-section{padding:32px 40px 16px;}
-  .hero-title{font-size:36px;}
-  .wait-card-top{margin:0 40px 16px;}
+  /* �곷떒諛� */
+  .topbar{padding:14px 32px;}
+  .tb-title{font-size:17px;}
+  .mode-btn{font-size:13px;padding:9px 18px;}
 
-  /* 탭 콘텐츠 중앙 정렬 + 넓게 */
+  /* �덉뼱濡� */
+  .hero-section{padding:40px 0 20px;text-align:center;}
+  .hero-label{font-size:13px;margin-bottom:10px;}
+  .hero-title{font-size:42px;}
+
+  /* ��湲� 移대뱶 */
+  .wait-card-top{
+    max-width:640px;margin:0 auto 20px;
+    padding:20px 28px;border-radius:16px;
+  }
+  .wc-left .wc-num{font-size:34px;}
+  .wc-left .wc-lbl{font-size:13px;}
+  .wc-right .wc-time{font-size:20px;}
+  .wc-right .wc-worker{font-size:13px;}
+
+  /* �� */
+  .tabs{justify-content:center;padding:0 0 12px;gap:8px;}
+  .tab{padding:10px 22px;font-size:14px;}
+
+  /* 肄섑뀗痢� �곸뿭 */
   #stuPage.on .scroll{
-    max-width:680px;
+    max-width:640px;
     margin:0 auto;
     width:100%;
-    padding:20px 0 40px;
+    padding:24px 0 60px;
   }
 
-  /* 카드 여백 넉넉하게 */
-  .card{padding:20px 24px;margin-bottom:14px;}
+  /* 移대뱶 */
+  .card{padding:24px 28px;margin-bottom:16px;border-radius:16px;}
+  .sec-title{font-size:24px;margin-bottom:6px;}
+  .sec-sub{font-size:15px;margin-bottom:20px;}
 
-  /* 폼 글씨 크게 */
-  input,select,textarea{font-size:15px;padding:12px 14px;}
-  .fg label{font-size:12px;}
+  /* �� */
+  .fg label{font-size:13px;margin-bottom:6px;}
+  input,select,textarea{font-size:16px;padding:13px 16px;border-radius:12px;}
+  .frow{gap:12px;}
 
-  /* 스텝바 크게 */
-  .step-bar{margin-bottom:24px;}
-  .stp-c{width:30px;height:30px;font-size:12px;}
-  .stp-l{font-size:11px;}
+  /* 移� */
+  .chip-opt{padding:11px 20px;font-size:14px;border-radius:99px;}
+  .chip-row{gap:8px;}
 
-  /* 버튼 크게 */
-  .btn{padding:14px 16px;font-size:15px;border-radius:12px;}
+  /* �ㅽ뀦諛� */
+  .step-bar{margin-bottom:28px;}
+  .stp-c{width:32px;height:32px;font-size:13px;}
+  .stp-l{font-size:12px;}
+  .stp-line{margin:0 6px;}
 
-  /* 섹션 타이틀 */
-  .sec-title{font-size:22px;}
-  .sec-sub{font-size:14px;}
+  /* �듭뀡 踰꾪듉�� */
+  .sz-big{padding:20px 8px;}
+  .szg-main{font-size:30px;}
+  .szg-sub{font-size:11px;}
+  .opt{padding:14px 8px;}
+  .opt-t{font-size:15px;}
+  .opt-s{font-size:12px;}
+  .disc-opt{padding:11px 16px;font-size:14px;}
 
-  /* 옵션 버튼들 */
-  .sz-big{padding:18px 8px;}
-  .szg-main{font-size:28px;}
-  .opt{padding:12px 8px;}
-  .opt-t{font-size:14px;}
-  .chip-opt{padding:10px 18px;font-size:13px;}
+  /* �섎떒 踰꾪듉 */
+  .btn{padding:15px 18px;font-size:16px;border-radius:12px;}
+  .btn-row{gap:10px;margin-top:20px;}
 
-  /* 탭 알약 */
-  .tab{padding:10px 20px;font-size:13px;}
+  /* �뚮┝ */
+  .notice{font-size:14px;padding:12px 16px;}
 }
 
-@media(min-width:900px){
-  /* 더 넓은 화면에서 더 크게 */
-  #stuPage.on .scroll{max-width:800px;}
-  .wait-card-top{margin:0 60px 20px;}
-  .hero-section{padding:40px 60px 20px;}
+@media(min-width:960px){
+  .hero-title{font-size:52px;}
+  .wait-card-top{max-width:760px;}
+  #stuPage.on .scroll{max-width:760px;}
+  .card{padding:28px 32px;}
+  .sec-title{font-size:28px;}
+}
+  .wait-card-top{margin:0 auto 20px;}
 }
 
-/* 환불 */
+/* �섎텋 */
 .refund-policy li{font-size:13px;color:var(--tx2);padding:5px 0;border-bottom:1px solid var(--bdr);line-height:1.5;list-style:none;}
-.refund-policy li::before{content:"• ";color:var(--p);}
+.refund-policy li::before{content:"�� ";color:var(--p);}
 
-/* 파일함 */
+/* �뚯씪�� */
 .adm-file-row{display:flex;align-items:center;gap:10px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;}
 .adm-file-info{flex:1;min-width:0;}
 .adm-file-oid{font-size:12px;font-weight:800;color:var(--p);margin-bottom:2px;}
